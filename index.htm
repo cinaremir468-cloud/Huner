@@ -103,6 +103,11 @@
             background-clip: text;
         }
 
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -517,6 +522,40 @@
             border-radius: 12px;
             padding: 1.5rem;
             margin-top: 1rem;
+            position: relative;
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .content-card:hover .card-actions {
+            opacity: 1;
+        }
+
+        .card-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .card-action-btn:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
         }
 
         .card-type-badge {
@@ -763,30 +802,6 @@
             overflow-x: auto;
         }
 
-        /* Form */
-        .form-field {
-            margin-bottom: 1rem;
-        }
-
-        .form-field label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-        }
-
-        .form-field input,
-        .form-field select,
-        .form-field textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -923,6 +938,7 @@
             box-shadow: 0 10px 30px var(--shadow);
             display: none;
             min-width: 240px;
+            z-index: 1000;
         }
 
         .content-type-picker.show {
@@ -1109,7 +1125,8 @@
             margin-bottom: 0.5rem;
         }
 
-        .settings-select {
+        .settings-select,
+        .settings-input {
             width: 100%;
             padding: 0.75rem;
             border-radius: 8px;
@@ -1117,6 +1134,10 @@
             background: var(--bg-secondary);
             color: var(--text-primary);
             cursor: pointer;
+        }
+
+        .settings-input {
+            cursor: text;
         }
 
         .btn-danger {
@@ -1134,6 +1155,21 @@
         .btn-danger:hover {
             opacity: 0.9;
         }
+
+        .api-key-hint {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 0.5rem;
+        }
+
+        .api-key-hint a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .api-key-hint a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -1145,45 +1181,45 @@
                 <div class="auth-logo-text">Hunerium AI</div>
             </div>
             
-            <div id="login-form">
+            <form id="login-form" class="auth-form" onsubmit="login(event)">
                 <div class="form-group">
                     <label>E-posta</label>
-                    <input type="email" id="login-email" placeholder="ornek@email.com">
+                    <input type="email" id="login-email" placeholder="ornek@email.com" required>
                 </div>
                 <div class="form-group">
                     <label>Şifre</label>
-                    <input type="password" id="login-password" placeholder="••••••••">
+                    <input type="password" id="login-password" placeholder="••••••••" required>
                 </div>
-                <button class="btn-primary" onclick="login()">Giriş Yap</button>
-                <button class="btn-google" onclick="loginWithGoogle()">
+                <button type="submit" class="btn-primary">Giriş Yap</button>
+                <button type="button" class="btn-google" onclick="loginWithGoogle()">
                     <span>🔐</span> Google ile Giriş
                 </button>
                 <div class="auth-switch">
                     Hesabınız yok mu? <a onclick="showRegister()">Kayıt Olun</a>
                 </div>
-            </div>
+            </form>
 
-            <div id="register-form" class="hidden">
+            <form id="register-form" class="auth-form hidden" onsubmit="register(event)">
                 <div class="form-group">
                     <label>Ad Soyad</label>
-                    <input type="text" id="register-name" placeholder="Adınız">
+                    <input type="text" id="register-name" placeholder="Adınız" required>
                 </div>
                 <div class="form-group">
                     <label>E-posta</label>
-                    <input type="email" id="register-email" placeholder="ornek@email.com">
+                    <input type="email" id="register-email" placeholder="ornek@email.com" required>
                 </div>
                 <div class="form-group">
                     <label>Şifre</label>
-                    <input type="password" id="register-password" placeholder="••••••••">
+                    <input type="password" id="register-password" placeholder="••••••••" required>
                 </div>
-                <button class="btn-primary" onclick="register()">Kayıt Ol</button>
-                <button class="btn-google" onclick="loginWithGoogle()">
+                <button type="submit" class="btn-primary">Kayıt Ol</button>
+                <button type="button" class="btn-google" onclick="loginWithGoogle()">
                     <span>🔐</span> Google ile Kayıt Ol
                 </button>
                 <div class="auth-switch">
                     Zaten hesabınız var mı? <a onclick="showLogin()">Giriş Yapın</a>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -1252,56 +1288,56 @@
                                 </button>
                             </div>
                             <div class="content-type-picker" id="type-picker">
-                                <div class="type-option" onclick="selectType('chat', '💬')">
+                                <div class="type-option" onclick="selectType(event, 'chat', '💬')">
                                     <div class="type-option-icon">💬</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Sohbet</div>
                                         <div class="type-option-desc">Normal sohbet</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('note', '📝')">
+                                <div class="type-option" onclick="selectType(event, 'note', '📝')">
                                     <div class="type-option-icon">📝</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Not</div>
                                         <div class="type-option-desc">Düz metin notu</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('table', '📊')">
+                                <div class="type-option" onclick="selectType(event, 'table', '📊')">
                                     <div class="type-option-icon">📊</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Tablo</div>
                                         <div class="type-option-desc">Veri tablosu</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('todo', '✅')">
+                                <div class="type-option" onclick="selectType(event, 'todo', '✅')">
                                     <div class="type-option-icon">✅</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Yapılacaklar</div>
                                         <div class="type-option-desc">Görev listesi</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('swot', '🎯')">
+                                <div class="type-option" onclick="selectType(event, 'swot', '🎯')">
                                     <div class="type-option-icon">🎯</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">SWOT Analizi</div>
                                         <div class="type-option-desc">SWOT matrisi</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('links', '🔗')">
+                                <div class="type-option" onclick="selectType(event, 'links', '🔗')">
                                     <div class="type-option-icon">🔗</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Link Koleksiyonu</div>
                                         <div class="type-option-desc">Link listesi</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('diagram', '📈')">
+                                <div class="type-option" onclick="selectType(event, 'diagram', '📈')">
                                     <div class="type-option-icon">📈</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Diyagram</div>
                                         <div class="type-option-desc">Akış şeması</div>
                                     </div>
                                 </div>
-                                <div class="type-option" onclick="selectType('chart', '📉')">
+                                <div class="type-option" onclick="selectType(event, 'chart', '📉')">
                                     <div class="type-option-icon">📉</div>
                                     <div class="type-option-text">
                                         <div class="type-option-name">Grafik</div>
@@ -1325,6 +1361,13 @@
             <div class="modal-header">
                 <div class="modal-title">Ayarlar</div>
                 <button class="modal-close" onclick="closeSettings()">×</button>
+            </div>
+            <div class="settings-group">
+                <label class="settings-label">OpenAI API Key</label>
+                <input type="password" class="settings-input" id="api-key-input" placeholder="sk-...">
+                <div class="api-key-hint">
+                    API key'inizi <a href="https://platform.openai.com/api-keys" target="_blank">buradan</a> alabilirsiniz.
+                </div>
             </div>
             <div class="settings-group">
                 <label class="settings-label">Tema</label>
@@ -1353,17 +1396,14 @@
     <script>
         // Firebase Configuration
         const firebaseConfig = {
-             apiKey: "AIzaSyDj11iINJdpBIRhfICNCNxlybCZSFfNaxM",
-  authDomain: "ainotes-205bd.firebaseapp.com",
-  projectId: "ainotes-205bd",
-  storageBucket: "ainotes-205bd.firebasestorage.app",
-  messagingSenderId: "155065970423",
-  appId: "1:155065970423:web:1d90a6bdfac8c10f65adf2",
-  measurementId: "G-LM7MKB57K3"
+            apiKey: "AIzaSyDj11iINJdpBIRhfICNCNxlybCZSFfNaxM",
+            authDomain: "ainotes-205bd.firebaseapp.com",
+            projectId: "ainotes-205bd",
+            storageBucket: "ainotes-205bd.firebasestorage.app",
+            messagingSenderId: "155065970423",
+            appId: "1:155065970423:web:1d90a6bdfac8c10f65adf2",
+            measurementId: "G-LM7MKB57K3"
         };
-
-        // IMPORTANT: Replace with your OpenAI API key
-        const OPENAI_API_KEY = "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";
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1378,6 +1418,16 @@
         let messages = [];
         let theme = 'light';
         let selectedModel = 'gpt-4o';
+        let apiKey = '';
+
+        // Initialize Mermaid
+        if (typeof mermaid !== 'undefined') {
+            mermaid.initialize({ 
+                startOnLoad: false,
+                theme: 'default',
+                securityLevel: 'loose'
+            });
+        }
 
         // Auth Functions
         function showLogin() {
@@ -1390,7 +1440,8 @@
             document.getElementById('register-form').classList.remove('hidden');
         }
 
-        async function login() {
+        async function login(e) {
+            e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             
@@ -1401,15 +1452,11 @@
             }
         }
 
-        async function register() {
+        async function register(e) {
+            e.preventDefault();
             const name = document.getElementById('register-name').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            
-            if (!name || !email || !password) {
-                alert('Lütfen tüm alanları doldurun');
-                return;
-            }
             
             try {
                 const result = await auth.createUserWithEmailAndPassword(email, password);
@@ -1472,7 +1519,10 @@
         async function loadUserData() {
             if (!currentUser) return;
             
-            // Load chats without order field to avoid index requirement
+            // Load API Key
+            apiKey = localStorage.getItem('openai_api_key') || '';
+            
+            // Load chats
             const chatsSnapshot = await db.collection('chats')
                 .where('userId', '==', currentUser.uid)
                 .get();
@@ -1515,7 +1565,7 @@
             };
             
             const docRef = await db.collection('chats').add(chatData);
-            const newChat = { id: docRef.id, ...chatData };
+            const newChat = { id: docRef.id, ...chatData, createdAt: new Date(), updatedAt: new Date() };
             chats.unshift(newChat);
             
             renderChatList();
@@ -1560,7 +1610,7 @@
             }
             
             container.innerHTML = chats.map(chat => {
-                const date = chat.updatedAt ? formatRelativeTime(chat.updatedAt.toDate()) : 'Şimdi';
+                const date = chat.updatedAt ? formatRelativeTime(chat.updatedAt.toDate ? chat.updatedAt.toDate() : new Date(chat.updatedAt)) : 'Şimdi';
                 return `
                     <div class="chat-item ${chat.id === currentChatId ? 'active' : ''}" data-chat-id="${chat.id}" onclick="loadChat('${chat.id}')">
                         <div class="chat-item-content">
@@ -1635,7 +1685,7 @@
             container.innerHTML = messages.map(msg => renderMessage(msg)).join('');
             scrollToBottom();
             
-            // Render diagrams and charts
+            // Render diagrams and charts after DOM update
             setTimeout(() => {
                 messages.forEach(msg => {
                     if (msg.contentType === 'diagram' && msg.content) {
@@ -1657,7 +1707,7 @@
             if (msg.contentType && msg.contentType !== 'chat') {
                 contentHtml = `<div class="content-card">${renderContent(msg)}</div>`;
             } else {
-                contentHtml = `<div>${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>`;
+                contentHtml = `<div>${escapeHtml(msg.content || '').replace(/\n/g, '<br>')}</div>`;
             }
             
             return `
@@ -1692,84 +1742,97 @@
             
             html += '<div class="card-content">';
             
-            switch (msg.contentType) {
-                case 'note':
-                    html += `<div class="markdown-content">${marked.parse(msg.content)}</div>`;
-                    break;
-                
-                case 'table':
-                    html += `<div class="markdown-content">${marked.parse(msg.content)}</div>`;
-                    break;
-                
-                case 'todo':
-                    const todos = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
-                    html += '<ul class="todo-list">';
-                    todos.forEach((todo, i) => {
+            try {
+                switch (msg.contentType) {
+                    case 'note':
+                        if (typeof marked !== 'undefined') {
+                            html += `<div class="markdown-content">${marked.parse(msg.content)}</div>`;
+                        } else {
+                            html += `<div>${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>`;
+                        }
+                        break;
+                    
+                    case 'table':
+                        if (typeof marked !== 'undefined') {
+                            html += `<div class="markdown-content">${marked.parse(msg.content)}</div>`;
+                        } else {
+                            html += `<pre>${escapeHtml(msg.content)}</pre>`;
+                        }
+                        break;
+                    
+                    case 'todo':
+                        const todos = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+                        html += '<ul class="todo-list">';
+                        todos.forEach((todo) => {
+                            html += `
+                                <li class="todo-item">
+                                    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} disabled>
+                                    <span class="todo-text ${todo.completed ? 'completed' : ''}">${escapeHtml(todo.text)}</span>
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        break;
+                    
+                    case 'swot':
+                        const swot = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
                         html += `
-                            <li class="todo-item">
-                                <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
-                                <span class="todo-text ${todo.completed ? 'completed' : ''}">${escapeHtml(todo.text)}</span>
-                            </li>
-                        `;
-                    });
-                    html += '</ul>';
-                    break;
-                
-                case 'swot':
-                    const swot = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
-                    html += `
-                        <div class="swot-grid">
-                            <div class="swot-quadrant strengths">
-                                <div class="swot-title">💪 Güçlü Yönler</div>
-                                <div class="swot-content">
-                                    <ul>${swot.strengths.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+                            <div class="swot-grid">
+                                <div class="swot-quadrant strengths">
+                                    <div class="swot-title">💪 Güçlü Yönler</div>
+                                    <div class="swot-content">
+                                        <ul>${(swot.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="swot-quadrant weaknesses">
-                                <div class="swot-title">⚠️ Zayıf Yönler</div>
-                                <div class="swot-content">
-                                    <ul>${swot.weaknesses.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+                                <div class="swot-quadrant weaknesses">
+                                    <div class="swot-title">⚠️ Zayıf Yönler</div>
+                                    <div class="swot-content">
+                                        <ul>${(swot.weaknesses || []).map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="swot-quadrant opportunities">
-                                <div class="swot-title">🚀 Fırsatlar</div>
-                                <div class="swot-content">
-                                    <ul>${swot.opportunities.map(o => `<li>${escapeHtml(o)}</li>`).join('')}</ul>
+                                <div class="swot-quadrant opportunities">
+                                    <div class="swot-title">🚀 Fırsatlar</div>
+                                    <div class="swot-content">
+                                        <ul>${(swot.opportunities || []).map(o => `<li>${escapeHtml(o)}</li>`).join('')}</ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="swot-quadrant threats">
-                                <div class="swot-title">⚡ Tehditler</div>
-                                <div class="swot-content">
-                                    <ul>${swot.threats.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+                                <div class="swot-quadrant threats">
+                                    <div class="swot-title">⚡ Tehditler</div>
+                                    <div class="swot-content">
+                                        <ul>${(swot.threats || []).map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    `;
-                    break;
-                
-                case 'links':
-                    const links = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
-                    links.forEach(link => {
-                        html += `
-                            <div class="link-item">
-                                <div class="link-title">${escapeHtml(link.title)}</div>
-                                <a href="${escapeHtml(link.url)}" target="_blank" class="link-url">${escapeHtml(link.url)}</a>
-                                ${link.description ? `<div class="link-description">${escapeHtml(link.description)}</div>` : ''}
                             </div>
                         `;
-                    });
-                    break;
-                
-                case 'diagram':
-                    html += `<div class="diagram-container" id="diagram-${msg.id}"></div>`;
-                    break;
-                
-                case 'chart':
-                    html += `<div class="chart-container"><canvas id="chart-${msg.id}"></canvas></div>`;
-                    break;
-                
-                default:
-                    html += escapeHtml(msg.content);
+                        break;
+                    
+                    case 'links':
+                        const links = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+                        links.forEach(link => {
+                            html += `
+                                <div class="link-item">
+                                    <div class="link-title">${escapeHtml(link.title)}</div>
+                                    <a href="${escapeHtml(link.url)}" target="_blank" class="link-url">${escapeHtml(link.url)}</a>
+                                    ${link.description ? `<div class="link-description">${escapeHtml(link.description)}</div>` : ''}
+                                </div>
+                            `;
+                        });
+                        break;
+                    
+                    case 'diagram':
+                        html += `<div class="diagram-container" id="diagram-${msg.id}">Diyagram yükleniyor...</div>`;
+                        break;
+                    
+                    case 'chart':
+                        html += `<div class="chart-container"><canvas id="chart-${msg.id}"></canvas></div>`;
+                        break;
+                    
+                    default:
+                        html += escapeHtml(msg.content || '');
+                }
+            } catch (error) {
+                console.error('Content render error:', error);
+                html += `<pre>${escapeHtml(JSON.stringify(msg.content, null, 2))}</pre>`;
             }
             
             html += '</div>';
@@ -1778,31 +1841,35 @@
 
         function renderDiagram(msgId, content) {
             const element = document.getElementById(`diagram-${msgId}`);
-            if (!element) return;
+            if (!element || typeof mermaid === 'undefined') return;
             
             try {
-                mermaid.initialize({ startOnLoad: true, theme: theme === 'dark' ? 'dark' : 'default' });
-                mermaid.render('mermaid-' + msgId, content).then(result => {
+                const cleanContent = content.trim();
+                mermaid.render('mermaid-' + msgId, cleanContent).then(result => {
                     element.innerHTML = result.svg;
+                }).catch(error => {
+                    console.error('Mermaid render error:', error);
+                    element.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
                 });
             } catch (error) {
+                console.error('Diagram error:', error);
                 element.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
             }
         }
 
         function renderChart(msgId, content) {
             const canvas = document.getElementById(`chart-${msgId}`);
-            if (!canvas) return;
+            if (!canvas || typeof Chart === 'undefined') return;
             
             try {
                 const chartData = typeof content === 'string' ? JSON.parse(content) : content;
                 new Chart(canvas, {
                     type: chartData.type || 'bar',
                     data: {
-                        labels: chartData.labels,
+                        labels: chartData.labels || [],
                         datasets: [{
                             label: chartData.label || 'Veri',
-                            data: chartData.data,
+                            data: chartData.data || [],
                             backgroundColor: [
                                 'rgba(124, 58, 237, 0.8)',
                                 'rgba(99, 102, 241, 0.8)',
@@ -1829,6 +1896,13 @@
             
             if (!message || !currentChatId) return;
             
+            // Check API key
+            if (!apiKey) {
+                alert('Lütfen önce ayarlardan OpenAI API Key\'inizi girin!');
+                openSettings();
+                return;
+            }
+            
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = true;
             
@@ -1841,7 +1915,7 @@
             };
             
             await db.collection('chats').doc(currentChatId).collection('messages').add(userMessage);
-            messages.push({ ...userMessage, createdAt: new Date() });
+            messages.push({ ...userMessage, id: Date.now().toString(), createdAt: new Date() });
             
             input.value = '';
             input.style.height = 'auto';
@@ -1865,7 +1939,7 @@
                     };
                     
                     await db.collection('chats').doc(currentChatId).collection('messages').add(aiMessage);
-                    messages.push({ ...aiMessage, id: Date.now().toString(), createdAt: new Date() });
+                    messages.push({ ...aiMessage, id: (Date.now() + 1).toString(), createdAt: new Date() });
                     
                     // Auto-generate title if first message
                     if (messages.length === 2) {
@@ -1886,7 +1960,7 @@
                 sendBtn.disabled = false;
                 
                 // Reset to chat type
-                selectType('chat', '💬');
+                selectType(null, 'chat', '💬');
             }
         }
 
@@ -1915,10 +1989,10 @@
                         systemPrompt += `Link koleksiyonu oluştur. JSON formatında yanıt ver: {"type": "links", "title": "Başlık", "content": [{"title": "", "url": "", "description": ""}]}`;
                         break;
                     case 'diagram':
-                        systemPrompt += `Mermaid syntax ile akış diyagramı oluştur. JSON formatında yanıt ver: {"type": "diagram", "title": "Başlık", "content": "mermaid kodu"}`;
+                        systemPrompt += `Mermaid syntax ile akış diyagramı oluştur. JSON formatında yanıt ver: {"type": "diagram", "title": "Başlık", "content": "graph TD\\nA[Başlangıç] --> B[Adım]\\nB --> C[Son]"}. Sadece geçerli Mermaid syntax kullan.`;
                         break;
                     case 'chart':
-                        systemPrompt += `Grafik verisi oluştur. JSON formatında yanıt ver: {"type": "chart", "title": "Başlık", "content": {"type": "bar", "labels": [], "data": []}}`;
+                        systemPrompt += `Grafik verisi oluştur. JSON formatında yanıt ver: {"type": "chart", "title": "Başlık", "content": {"type": "bar", "labels": ["A", "B", "C"], "data": [10, 20, 30]}}`;
                         break;
                 }
             }
@@ -1927,7 +2001,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
                     model: selectedModel,
@@ -1965,7 +2039,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                        'Authorization': `Bearer ${apiKey}`
                     },
                     body: JSON.stringify({
                         model: 'gpt-3.5-turbo',
@@ -2043,7 +2117,7 @@
             }
         }
 
-        function selectType(type, icon) {
+        function selectType(event, type, icon) {
             currentContentType = type;
             document.getElementById('selected-type-icon').textContent = icon;
             document.getElementById('type-picker').classList.remove('show');
@@ -2052,7 +2126,9 @@
             document.querySelectorAll('.type-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
-            event.currentTarget.classList.add('selected');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('selected');
+            }
         }
 
         // UI Functions
@@ -2090,22 +2166,40 @@
                 document.documentElement.setAttribute('data-theme', theme);
                 document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
             }
+            
+            // Reinit mermaid with theme
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({ 
+                    startOnLoad: false,
+                    theme: theme === 'dark' ? 'dark' : 'default',
+                    securityLevel: 'loose'
+                });
+            }
         }
 
         function openSettings() {
             document.getElementById('settings-modal').classList.add('show');
             document.getElementById('theme-select').value = theme;
             document.getElementById('model-select').value = selectedModel;
+            document.getElementById('api-key-input').value = apiKey;
         }
 
         function closeSettings() {
-            document.getElementById('settings-modal').classList.remove('show');
+            const newApiKey = document.getElementById('api-key-input').value.trim();
+            if (newApiKey) {
+                apiKey = newApiKey;
+                localStorage.setItem('openai_api_key', apiKey);
+            }
+            
             selectedModel = document.getElementById('model-select').value;
             localStorage.setItem('model', selectedModel);
+            
+            document.getElementById('settings-modal').classList.remove('show');
         }
 
         // Utility Functions
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
@@ -2136,7 +2230,7 @@
         // Close modals on outside click
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
-                e.target.classList.remove('show');
+                closeSettings();
             }
         });
 
@@ -2144,6 +2238,7 @@
         window.addEventListener('load', () => {
             theme = localStorage.getItem('theme') || 'light';
             selectedModel = localStorage.getItem('model') || 'gpt-4o';
+            apiKey = localStorage.getItem('openai_api_key') || '';
             applyTheme();
         });
     </script>
