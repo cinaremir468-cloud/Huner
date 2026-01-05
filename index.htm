@@ -3,548 +3,796 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunerium AI - Akıllı Çalışma Asistanı</title>
-    
-    <!-- External Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
+    <title>YouTube Shorts Yöneticisi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --accent: #ff0033;
+            --accent-hover: #ff3355;
+            --accent-glow: rgba(255, 0, 51, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: #2a2a2a;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --info: #00aaff;
+            --gradient-1: linear-gradient(135deg, #ff0033 0%, #ff6600 100%);
+            --gradient-2: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f9fafb;
-            --bg-tertiary: #f3f4f6;
-            --bg-hover: #f0f0f0;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --text-tertiary: #9ca3af;
-            --border: #e5e7eb;
-            --accent: #7c3aed;
-            --accent-hover: #6d28d9;
-            --accent-light: #ede9fe;
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --shadow: rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #1f2937;
-            --bg-secondary: #111827;
-            --bg-tertiary: #0f172a;
-            --bg-hover: #374151;
-            --text-primary: #f9fafb;
-            --text-secondary: #d1d5db;
-            --text-tertiary: #9ca3af;
-            --border: #374151;
-            --accent: #8b5cf6;
-            --accent-hover: #7c3aed;
-            --accent-light: #2e1065;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .hidden { display: none !important; }
-
-        /* Alert Notification */
-        .alert {
+        .bg-pattern {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px var(--shadow);
-            z-index: 9999;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 102, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        header {
+            position: relative;
+            z-index: 10;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            max-width: 400px;
-            animation: slideIn 0.3s ease;
+            justify-content: space-between;
+            backdrop-filter: blur(10px);
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .alert-error {
-            background: #fee;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fcd34d;
-        }
-
-        .alert-icon {
-            font-size: 1.5rem;
-        }
-
-        .alert-close {
-            margin-left: auto;
-            background: none;
-            border: none;
-            font-size: 1.25rem;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-
-        .alert-close:hover {
-            opacity: 1;
-        }
-
-        /* Auth Screen */
-        .auth-screen {
-            min-height: 100vh;
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-1);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem;
+            font-size: 24px;
+            box-shadow: 0 4px 20px var(--accent-glow);
         }
 
-        .auth-box {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 3rem;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .auth-logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .auth-logo-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-logo-text {
-            font-size: 1.8rem;
+        .logo h1 {
+            font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient-1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .auth-form {
+        .header-actions {
             display: flex;
-            flex-direction: column;
+            gap: 12px;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            color: #374151;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.875rem;
-            border-radius: 12px;
-            border: 2px solid #e5e7eb;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #7c3aed;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 0.5rem;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-google {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 2px solid #e5e7eb;
-            background: white;
-            color: #374151;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 1rem;
+        .container {
+            position: relative;
+            z-index: 10;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-google:hover {
-            background: #f9fafb;
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #6b7280;
-        }
-
-        .auth-switch a {
-            color: #7c3aed;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* Main Layout - Diğer stiller öncekiyle aynı, buraya yazmıyorum... */
-        .app-container {
-            display: flex;
-            height: 100vh;
+            min-height: calc(100vh - 80px);
         }
 
         .sidebar {
             width: 280px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s;
+            gap: 1rem;
         }
 
-        .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
         }
 
-        .new-chat-btn {
-            width: 100%;
-            padding: 0.875rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
+        .channel-list {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .new-chat-btn:hover {
-            background: var(--bg-hover);
-        }
-
-        .search-box {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.875rem;
-        }
-
-        .chat-list {
+            flex-direction: column;
+            gap: 8px;
             flex: 1;
             overflow-y: auto;
-            padding: 0.5rem;
         }
 
-        .chat-item {
-            padding: 0.875rem;
-            border-radius: 8px;
+        .channel-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 10px;
         }
 
-        .chat-item:hover {
-            background: var(--bg-hover);
+        .channel-item:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
         }
 
-        .chat-item.active {
-            background: var(--accent-light);
-            color: var(--accent);
+        .channel-item.active {
+            background: var(--accent);
+            border-color: var(--accent);
         }
 
-        .chat-item-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .chat-item-title {
-            font-weight: 500;
-            font-size: 0.875rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .chat-item-date {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 0.125rem;
-        }
-
-        .sidebar-footer {
-            padding: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .user-menu:hover {
-            background: var(--bg-hover);
-        }
-
-        .user-avatar {
+        .channel-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: var(--accent);
-            color: white;
+            background: var(--gradient-1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
         }
 
-        .user-info {
+        .channel-info {
             flex: 1;
             min-width: 0;
         }
 
-        .user-name {
-            font-weight: 500;
-            font-size: 0.875rem;
+        .channel-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
         }
 
-        .user-email {
+        .channel-count {
             font-size: 0.75rem;
-            color: var(--text-tertiary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            color: var(--text-secondary);
+        }
+
+        .channel-item.active .channel-count {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .delete-channel {
+            opacity: 0;
+            background: rgba(255, 0, 0, 0.2);
+            border: none;
+            color: #ff4444;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .channel-item:hover .delete-channel {
+            opacity: 1;
+        }
+
+        .delete-channel:hover {
+            background: rgba(255, 0, 0, 0.4);
         }
 
         .main-content {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-primary);
+            padding: 2rem;
+            overflow-y: auto;
         }
 
-        .top-bar {
-            height: 60px;
-            border-bottom: 1px solid var(--border);
+        .content-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .chat-title-container {
-            flex: 1;
+        .content-title {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .content-subtitle {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .tabs {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
+            margin-bottom: 2rem;
+            background: var(--bg-secondary);
+            padding: 6px;
+            border-radius: 12px;
+            width: fit-content;
         }
 
-        .chat-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            background: transparent;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 6px;
-            transition: all 0.2s;
-            max-width: 400px;
-        }
-
-        .icon-btn {
-            width: 36px;
-            height: 36px;
+        .tab {
+            padding: 10px 20px;
             border-radius: 8px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-size: 1.25rem;
+            transition: all 0.3s ease;
         }
 
-        .icon-btn:hover {
-            background: var(--bg-hover);
+        .tab:hover {
+            color: var(--text-primary);
         }
 
-        .chat-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            scroll-behavior: smooth;
-        }
-
-        .messages-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .message {
-            margin-bottom: 1.5rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .message.user .message-avatar {
+        .tab.active {
             background: var(--accent);
             color: white;
         }
 
-        .message.assistant .message-avatar {
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px var(--accent-glow);
+        }
+
+        .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+            border: 1px solid var(--border);
         }
 
-        .message-name {
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff4444;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        .btn-success {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-success:hover {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .btn-info {
+            background: rgba(0, 170, 255, 0.1);
+            color: var(--info);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+        }
+
+        .btn-info:hover {
+            background: rgba(0, 170, 255, 0.2);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .video-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-card.completed {
+            opacity: 0.7;
+        }
+
+        .video-card.completed .video-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .video-frame {
+            aspect-ratio: 9/16;
+            background: var(--bg-tertiary);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-height: 280px;
+        }
+
+        .video-frame-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .video-frame-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .video-badges {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: 600;
-            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .message-content {
-            margin-left: 40px;
+        .badge-audio {
+            background: var(--success);
+            color: black;
+        }
+
+        .badge-video-pending {
+            background: var(--warning);
+            color: black;
+        }
+
+        .badge-video-approved {
+            background: var(--info);
+            color: white;
+        }
+
+        .badge-completed {
+            background: var(--success);
+            color: black;
+        }
+
+        .video-schedule {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .video-content {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-description {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            background: var(--bg-tertiary);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .video-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        tr.completed td {
+            opacity: 0.6;
+        }
+
+        tr.completed .table-title {
+            text-decoration: line-through;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .table-tags {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            max-width: 150px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-ready {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(255, 170, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .status-approved {
+            background: rgba(0, 170, 255, 0.1);
+            color: var(--info);
+        }
+
+        .status-completed {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .defaults-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .defaults-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .defaults-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .defaults-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            white-space: pre-wrap;
             line-height: 1.6;
         }
 
-        .content-card {
+        .defaults-content.collapsed {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .file-upload {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent);
+            background: rgba(255, 0, 51, 0.05);
+        }
+
+        .file-upload input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .file-name {
+            margin-top: 6px;
+            color: var(--success);
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
             padding: 1.5rem;
-            margin-top: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .card-type-badge {
-            display: inline-block;
-            padding: 0.375rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
         }
 
-        .badge-note { background: #dbeafe; color: #1e40af; }
-        .badge-table { background: #fef3c7; color: #92400e; }
-        .badge-todo { background: #d1fae5; color: #065f46; }
-        .badge-diagram { background: #fce7f3; color: #9f1239; }
-        .badge-chart { background: #e0e7ff; color: #3730a3; }
-
-        .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            background: var(--bg-tertiary);
             color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--accent);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
         }
 
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: var(--text-tertiary);
         }
 
         .empty-icon {
@@ -557,1200 +805,877 @@
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
             color: var(--text-secondary);
+            margin-bottom: 1.5rem;
         }
 
-        .input-area {
-            border-top: 1px solid var(--border);
-            padding: 1.5rem;
-            background: var(--bg-primary);
-        }
-
-        .input-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 1rem;
-            align-items: flex-end;
-        }
-
-        .input-box {
-            flex: 1;
-            position: relative;
-        }
-
-        .message-input {
-            width: 100%;
-            min-height: 52px;
-            max-height: 200px;
-            padding: 0.875rem 3.5rem 0.875rem 1rem;
-            border-radius: 12px;
-            border: 2px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 1rem;
-            resize: none;
-            transition: all 0.2s;
-        }
-
-        .message-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .input-actions {
-            position: absolute;
-            right: 0.5rem;
-            bottom: 0.5rem;
-        }
-
-        .content-type-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-
-        .content-type-btn:hover {
-            background: var(--bg-hover);
-        }
-
-        .send-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            border: none;
-            background: var(--accent);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .send-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .content-type-picker {
-            position: absolute;
-            bottom: 110%;
-            right: 0;
-            background: var(--bg-primary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.5rem;
-            box-shadow: 0 10px 30px var(--shadow);
-            display: none;
-            min-width: 240px;
-            z-index: 1000;
-        }
-
-        .content-type-picker.show {
-            display: block;
-        }
-
-        .type-option {
-            padding: 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .type-option:hover {
-            background: var(--bg-hover);
-        }
-
-        .type-option-icon {
-            font-size: 1.5rem;
-        }
-
-        .type-option-text {
-            flex: 1;
-        }
-
-        .type-option-name {
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .type-option-desc {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-        }
-
-        .loading-dots {
-            display: flex;
-            gap: 0.5rem;
-            margin-left: 40px;
-        }
-
-        .loading-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-tertiary);
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-
-        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .modal {
-            display: none;
+        .toast-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
+            bottom: 2rem;
+            right: 2rem;
             z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-success {
+            border-color: var(--success);
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
 
-        .modal.show {
-            display: flex;
+        .checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
         }
 
-        .modal-content {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background: var(--bg-secondary);
+        .checkbox-label {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1.25rem;
-        }
-
-        .settings-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .settings-label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .settings-input,
-        .settings-select {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .api-key-hint {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 0.5rem;
-        }
-
-        .api-key-hint a {
-            color: var(--accent);
-        }
-
-        .api-key-status {
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .api-key-status.valid {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .api-key-status.invalid {
-            background: #fee;
-            color: #991b1b;
-        }
-
-        .btn-danger {
-            width: 100%;
-            padding: 0.875rem;
-            border-radius: 8px;
-            border: none;
-            background: var(--error);
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
         }
 
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--border);
             border-radius: 4px;
         }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div id="auth-screen" class="auth-screen">
-        <div class="auth-box">
-            <div class="auth-logo">
-                <div class="auth-logo-icon">🧠</div>
-                <div class="auth-logo-text">Hunerium AI</div>
-            </div>
-            
-            <form id="login-form" class="auth-form" onsubmit="login(event)">
-                <div class="form-group">
-                    <label>E-posta</label>
-                    <input type="email" id="login-email" placeholder="ornek@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Şifre</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-primary">Giriş Yap</button>
-                <button type="button" class="btn-google" onclick="loginWithGoogle()">
-                    <span>🔐</span> Google ile Giriş
-                </button>
-                <div class="auth-switch">
-                    Hesabınız yok mu? <a onclick="showRegister()">Kayıt Olun</a>
-                </div>
-            </form>
+    <div class="bg-pattern"></div>
+    <div class="noise-overlay"></div>
 
-            <form id="register-form" class="auth-form hidden" onsubmit="register(event)">
-                <div class="form-group">
-                    <label>Ad Soyad</label>
-                    <input type="text" id="register-name" placeholder="Adınız" required>
-                </div>
-                <div class="form-group">
-                    <label>E-posta</label>
-                    <input type="email" id="register-email" placeholder="ornek@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Şifre</label>
-                    <input type="password" id="register-password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-primary">Kayıt Ol</button>
-                <button type="button" class="btn-google" onclick="loginWithGoogle()">
-                    <span>🔐</span> Google ile Kayıt Ol
-                </button>
-                <div class="auth-switch">
-                    Zaten hesabınız var mı? <a onclick="showLogin()">Giriş Yapın</a>
-                </div>
-            </form>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">▶</div>
+            <h1>Shorts Manager</h1>
         </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportData()">
+                📥 Dışa Aktar
+            </button>
+            <button class="btn btn-secondary" onclick="importDataClick()">
+                📤 İçe Aktar
+            </button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-title">Kanallarım</div>
+            <div class="channel-list" id="channelList"></div>
+            <button class="btn btn-primary" onclick="openChannelModal()" style="width: 100%;">
+                + Kanal Ekle
+            </button>
+        </aside>
+
+        <main class="main-content" id="mainContent"></main>
     </div>
 
-    <!-- Main App -->
-    <div id="app" class="app-container hidden">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <button class="new-chat-btn" onclick="createNewChat()">
-                    <span>✨</span> Yeni Sohbet
-                </button>
-            </div>
-            
-            <div class="search-box">
-                <input type="text" class="search-input" id="search-chats" placeholder="Sohbetlerde ara...">
-            </div>
-            
-            <div class="chat-list" id="chat-list"></div>
-            
-            <div class="sidebar-footer">
-                <div class="user-menu" onclick="openSettings()">
-                    <div class="user-avatar" id="sidebar-avatar">U</div>
-                    <div class="user-info">
-                        <div class="user-name" id="sidebar-name">Kullanıcı</div>
-                        <div class="user-email" id="sidebar-email">user@email.com</div>
-                    </div>
-                    <div style="color: var(--text-tertiary);">⚙️</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="top-bar">
-                <div class="chat-title-container">
-                    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
-                    <input type="text" class="chat-title" id="chat-title" value="Yeni Sohbet" onchange="updateChatTitle()">
-                </div>
-                <div class="top-bar-actions">
-                    <button class="icon-btn" onclick="toggleTheme()" title="Tema">
-                        <span id="theme-icon">🌙</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="chat-area" id="chat-area">
-                <div class="messages-container" id="messages-container">
-                    <div class="empty-state">
-                        <div class="empty-icon">🚀</div>
-                        <div class="empty-title">Hunerium AI'ya Hoş Geldiniz</div>
-                        <div class="empty-subtitle">Başlamak için bir mesaj yazın!</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="input-area">
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <div class="input-box">
-                            <textarea class="message-input" id="message-input" placeholder="Mesajınızı yazın..." rows="1" oninput="autoResize(this)"></textarea>
-                            <div class="input-actions">
-                                <button class="content-type-btn" onclick="toggleTypePicker()">
-                                    <span id="selected-type-icon">💬</span>
-                                </button>
-                            </div>
-                            <div class="content-type-picker" id="type-picker">
-                                <div class="type-option" onclick="selectType(event, 'chat', '💬')">
-                                    <div class="type-option-icon">💬</div>
-                                    <div class="type-option-text">
-                                        <div class="type-option-name">Sohbet</div>
-                                        <div class="type-option-desc">Normal sohbet</div>
-                                    </div>
-                                </div>
-                                <div class="type-option" onclick="selectType(event, 'note', '📝')">
-                                    <div class="type-option-icon">📝</div>
-                                    <div class="type-option-text">
-                                        <div class="type-option-name">Not</div>
-                                        <div class="type-option-desc">Düz metin notu</div>
-                                    </div>
-                                </div>
-                                <div class="type-option" onclick="selectType(event, 'table', '📊')">
-                                    <div class="type-option-icon">📊</div>
-                                    <div class="type-option-text">
-                                        <div class="type-option-name">Tablo</div>
-                                        <div class="type-option-desc">Veri tablosu</div>
-                                    </div>
-                                </div>
-                                <div class="type-option" onclick="selectType(event, 'todo', '✅')">
-                                    <div class="type-option-icon">✅</div>
-                                    <div class="type-option-text">
-                                        <div class="type-option-name">Yapılacaklar</div>
-                                        <div class="type-option-desc">Görev listesi</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="send-btn" id="send-btn" onclick="sendMessage()">
-                            <span>↑</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
+    <!-- Channel Modal -->
+    <div class="modal-overlay" id="channelModal">
+        <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">Ayarlar</div>
-                <button class="modal-close" onclick="closeSettings()">×</button>
+                <h3 class="modal-title" id="channelModalTitle">Yeni Kanal</h3>
+                <button class="modal-close" onclick="closeChannelModal()">×</button>
             </div>
-            <div class="settings-group">
-                <label class="settings-label">OpenAI API Key</label>
-                <input type="password" class="settings-input" id="api-key-input" placeholder="sk-..." oninput="validateApiKey()">
-                <div class="api-key-hint">
-                    API key'inizi <a href="https://platform.openai.com/api-keys" target="_blank">buradan</a> alabilirsiniz.
-                    <br>⚠️ <strong>GÜVENLİK UYARISI:</strong> API key tarayıcıda saklanıyor. Güvenlik için backend kullanmanız önerilir!
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Kanal Adı</label>
+                    <input type="text" class="form-input" id="channelName" placeholder="Örn: Gaming Channel">
                 </div>
-                <div id="api-key-status" class="api-key-status hidden"></div>
             </div>
-            <div class="settings-group">
-                <label class="settings-label">AI Model</label>
-                <select class="settings-select" id="model-select">
-                    <option value="gpt-4o">GPT-4o (En Güçlü)</option>
-                    <option value="gpt-4o-mini">GPT-4o Mini (Hızlı)</option>
-                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                </select>
-            </div>
-            <div class="settings-group">
-                <label class="settings-label">Tema</label>
-                <select class="settings-select" id="theme-select" onchange="setTheme(this.value)">
-                    <option value="light">Açık</option>
-                    <option value="dark">Koyu</option>
-                    <option value="auto">Otomatik</option>
-                </select>
-            </div>
-            <div class="settings-group">
-                <button class="btn-danger" onclick="logout()">Çıkış Yap</button>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeChannelModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveChannel()">Kaydet</button>
             </div>
         </div>
     </div>
+
+    <!-- Video Modal -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="videoModalTitle">Yeni Video</h3>
+                <button class="modal-close" onclick="closeVideoModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Başlık *</label>
+                    <input type="text" class="form-input" id="videoTitle" placeholder="Video başlığını girin">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea class="form-textarea" id="videoDescription" placeholder="Video açıklaması..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Etiketler (virgülle ayırın)</label>
+                    <input type="text" class="form-input" id="videoTags" placeholder="komedi, eğlence, viral">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">📅 Tarih</label>
+                        <input type="date" class="form-input" id="videoDate">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">🕐 Saat</label>
+                        <input type="time" class="form-input" id="videoTime">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🎵 Ses Dosyası</label>
+                    <div class="file-upload" id="audioUpload">
+                        <div class="file-upload-icon">🎵</div>
+                        <div class="file-upload-text">Ses dosyası yüklemek için tıklayın</div>
+                        <div class="file-name" id="audioFileName"></div>
+                        <input type="file" accept="audio/*" id="audioFile" onchange="handleAudioUpload(event)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🎬 Video Dosyası (MP4)</label>
+                    <div class="file-upload" id="videoUpload">
+                        <div class="file-upload-icon">🎬</div>
+                        <div class="file-upload-text">Video dosyası yüklemek için tıklayın</div>
+                        <div class="file-name" id="videoFileName"></div>
+                        <input type="file" accept="video/mp4" id="videoFile" onchange="handleVideoUpload(event)">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Metin (Video üzerinde gösterilecek)</label>
+                    <textarea class="form-textarea" id="videoText" placeholder="Video üzerinde gösterilecek metin..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeVideoModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveVideo()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Defaults Modal -->
+    <div class="modal-overlay" id="defaultsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Sabit Değerleri Düzenle</h3>
+                <button class="modal-close" onclick="closeDefaultsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Sabit Metin (Her videoya eklenecek bilgiler)</label>
+                    <textarea class="form-textarea" id="defaultText" rows="10" placeholder="Buraya sabit kalmasını istediğiniz metni yazın...&#10;&#10;Örnek:&#10;📱 Instagram: @kanalim&#10;🎵 TikTok: @kanalim&#10;📧 İletişim: mail@example.com"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDefaultsModal()">İptal</button>
+                <button class="btn btn-primary" onclick="saveDefaults()">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDj11iINJdpBIRhfICNCNxlybCZSFfNaxM",
-            authDomain: "ainotes-205bd.firebaseapp.com",
-            projectId: "ainotes-205bd",
-            storageBucket: "ainotes-205bd.firebasestorage.app",
-            messagingSenderId: "155065970423",
-            appId: "1:155065970423:web:1d90a6bdfac8c10f65adf2"
+        let data = {
+            channels: [],
+            selectedChannel: null
         };
+        let currentView = 'grid';
+        let editingVideoId = null;
+        let audioBase64 = null;
+        let audioName = null;
+        let videoBase64 = null;
+        let videoName = null;
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const STORAGE_KEY = 'youtube-shorts-manager';
 
-        // Global State
-        let currentUser = null;
-        let currentChatId = null;
-        let currentContentType = 'chat';
-        let chats = [];
-        let messages = [];
-        let theme = 'light';
-        let selectedModel = 'gpt-4o-mini';
-        let apiKey = '';
-
-        // Initialize Mermaid
-        if (typeof mermaid !== 'undefined') {
-            mermaid.initialize({ 
-                startOnLoad: false,
-                theme: 'default',
-                securityLevel: 'loose'
-            });
-        }
-
-        // Alert System
-        function showAlert(message, type = 'error') {
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type}`;
-            
-            const icons = {
-                error: '❌',
-                success: '✅',
-                warning: '⚠️'
-            };
-            
-            alert.innerHTML = `
-                <span class="alert-icon">${icons[type]}</span>
-                <div>${message}</div>
-                <button class="alert-close" onclick="this.parentElement.remove()">×</button>
-            `;
-            
-            document.body.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.style.animation = 'slideIn 0.3s ease reverse';
-                setTimeout(() => alert.remove(), 300);
-            }, 5000);
-        }
-
-        // API Key Validation
-        function validateApiKey() {
-            const keyInput = document.getElementById('api-key-input');
-            const key = keyInput.value.trim();
-            const statusDiv = document.getElementById('api-key-status');
-            
-            if (!key) {
-                statusDiv.classList.add('hidden');
-                return false;
-            }
-            
-            // Format kontrolü
-            const isValidFormat = /^sk-[a-zA-Z0-9-_]{20,}$/.test(key) || /^sk-proj-[a-zA-Z0-9-_]{20,}$/.test(key);
-            
-            statusDiv.classList.remove('hidden');
-            
-            if (isValidFormat) {
-                statusDiv.className = 'api-key-status valid';
-                statusDiv.innerHTML = '✓ API key formatı geçerli görünüyor';
-                return true;
-            } else {
-                statusDiv.className = 'api-key-status invalid';
-                statusDiv.innerHTML = '✗ Geçersiz API key formatı (sk- veya sk-proj- ile başlamalı)';
-                return false;
-            }
-        }
-
-        // Auth Functions
-        function showLogin() {
-            document.getElementById('login-form').classList.remove('hidden');
-            document.getElementById('register-form').classList.add('hidden');
-        }
-
-        function showRegister() {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('register-form').classList.remove('hidden');
-        }
-
-        async function login(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
+        async function saveData() {
             try {
-                await auth.signInWithEmailAndPassword(email, password);
-                showAlert('Başarıyla giriş yapıldı!', 'success');
-            } catch (error) {
-                showAlert('Giriş hatası: ' + error.message, 'error');
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                if (window.storage) {
+                    await window.storage.set(STORAGE_KEY, JSON.stringify(data), true);
+                }
+            } catch (e) {
+                console.log('Storage save error:', e);
             }
         }
 
-        async function register(e) {
-            e.preventDefault();
-            const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            
+        async function loadData() {
             try {
-                const result = await auth.createUserWithEmailAndPassword(email, password);
-                await result.user.updateProfile({ displayName: name });
-                
-                await db.collection('users').doc(result.user.uid).set({
-                    name: name,
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                showAlert('Kayıt başarılı!', 'success');
-            } catch (error) {
-                showAlert('Kayıt hatası: ' + error.message, 'error');
-            }
-        }
-
-        async function loginWithGoogle() {
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                await auth.signInWithPopup(provider);
-                showAlert('Google ile giriş başarılı!', 'success');
-            } catch (error) {
-                showAlert('Google giriş hatası: ' + error.message, 'error');
-            }
-        }
-
-        async function logout() {
-            await auth.signOut();
-            closeSettings();
-        }
-
-        // Auth State Observer
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentUser = user;
-                showApp();
-                await loadUserData();
-            } else {
-                currentUser = null;
-                showAuthScreen();
-            }
-        });
-
-        function showAuthScreen() {
-            document.getElementById('auth-screen').classList.remove('hidden');
-            document.getElementById('app').classList.add('hidden');
-        }
-
-        function showApp() {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            
-            const name = currentUser.displayName || currentUser.email;
-            const email = currentUser.email;
-            
-            document.getElementById('sidebar-avatar').textContent = name[0].toUpperCase();
-            document.getElementById('sidebar-name').textContent = name;
-            document.getElementById('sidebar-email').textContent = email;
-        }
-
-        // Load User Data
-        async function loadUserData() {
-            if (!currentUser) return;
-            
-            // Load API Key
-            apiKey = localStorage.getItem('openai_api_key') || '';
-            
-            // Validate saved API key
-            if (apiKey && !(/^sk-[a-zA-Z0-9-_]{20,}$/.test(apiKey) || /^sk-proj-[a-zA-Z0-9-_]{20,}$/.test(apiKey))) {
-                showAlert('Kaydedilen API key formatı geçersiz. Lütfen yeni bir key girin!', 'warning');
-                apiKey = '';
-                localStorage.removeItem('openai_api_key');
-            }
-            
-            // Load chats
-            const chatsSnapshot = await db.collection('chats')
-                .where('userId', '==', currentUser.uid)
-                .get();
-            
-            chats = [];
-            chatsSnapshot.forEach(doc => {
-                chats.push({ id: doc.id, ...doc.data() });
-            });
-            
-            chats.sort((a, b) => {
-                const timeA = a.updatedAt ? a.updatedAt.toMillis() : 0;
-                const timeB = b.updatedAt ? b.updatedAt.toMillis() : 0;
-                return timeB - timeA;
-            });
-            
-            renderChatList();
-            
-            if (chats.length > 0) {
-                loadChat(chats[0].id);
-            } else {
-                await createNewChat();
-            }
-            
-            // Load settings
-            theme = localStorage.getItem('theme') || 'light';
-            selectedModel = localStorage.getItem('model') || 'gpt-4o-mini';
-            applyTheme();
-            document.getElementById('model-select').value = selectedModel;
-            
-            // Check API key on load
-            if (!apiKey) {
-                showAlert('API key bulunamadı! Lütfen ayarlardan ekleyin.', 'warning');
-            }
-        }
-
-        // Chat Functions
-        async function createNewChat() {
-            const chatData = {
-                userId: currentUser.uid,
-                title: 'Yeni Sohbet',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            const docRef = await db.collection('chats').add(chatData);
-            const newChat = { id: docRef.id, ...chatData, createdAt: new Date(), updatedAt: new Date() };
-            chats.unshift(newChat);
-            
-            renderChatList();
-            loadChat(docRef.id);
-        }
-
-        async function loadChat(chatId) {
-            currentChatId = chatId;
-            
-            document.querySelectorAll('.chat-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.chatId === chatId);
-            });
-            
-            const messagesSnapshot = await db.collection('chats')
-                .doc(chatId)
-                .collection('messages')
-                .orderBy('createdAt', 'asc')
-                .get();
-            
-            messages = [];
-            messagesSnapshot.forEach(doc => {
-                messages.push({ id: doc.id, ...doc.data() });
-            });
-            
-            const chat = chats.find(c => c.id === chatId);
-            if (chat) {
-                document.getElementById('chat-title').value = chat.title;
-            }
-            
-            renderMessages();
-        }
-
-        function renderChatList() {
-            const container = document.getElementById('chat-list');
-            
-            if (chats.length === 0) {
-                container.innerHTML = '<div class="empty-state" style="padding: 2rem 1rem;"><div class="empty-subtitle">Henüz sohbet yok</div></div>';
-                return;
-            }
-            
-            container.innerHTML = chats.map(chat => {
-                const date = chat.updatedAt ? formatRelativeTime(chat.updatedAt.toDate ? chat.updatedAt.toDate() : new Date()) : 'Şimdi';
-                return `
-                    <div class="chat-item ${chat.id === currentChatId ? 'active' : ''}" data-chat-id="${chat.id}" onclick="loadChat('${chat.id}')">
-                        <div class="chat-item-content">
-                            <div class="chat-item-title">${escapeHtml(chat.title)}</div>
-                            <div class="chat-item-date">${date}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function updateChatTitle() {
-            const newTitle = document.getElementById('chat-title').value.trim();
-            if (!newTitle || !currentChatId) return;
-            
-            await db.collection('chats').doc(currentChatId).update({
-                title: newTitle,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            
-            const chat = chats.find(c => c.id === currentChatId);
-            if (chat) {
-                chat.title = newTitle;
-                renderChatList();
-            }
-        }
-
-        // Message Functions
-        function renderMessages() {
-            const container = document.getElementById('messages-container');
-            
-            if (messages.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🚀</div>
-                        <div class="empty-title">Sohbete Başlayın</div>
-                        <div class="empty-subtitle">Bir mesaj yazın!</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = messages.map(msg => renderMessage(msg)).join('');
-            scrollToBottom();
-        }
-
-        function renderMessage(msg) {
-            const isUser = msg.role === 'user';
-            const avatar = isUser ? (currentUser.displayName || 'U')[0].toUpperCase() : 'AI';
-            const name = isUser ? (currentUser.displayName || 'Siz') : 'Hunerium AI';
-            
-            let contentHtml = '';
-            
-            if (msg.contentType && msg.contentType !== 'chat') {
-                contentHtml = `<div class="content-card">${renderContent(msg)}</div>`;
-            } else {
-                contentHtml = `<div>${escapeHtml(msg.content || '').replace(/\n/g, '<br>')}</div>`;
-            }
-            
-            return `
-                <div class="message ${msg.role}">
-                    <div class="message-header">
-                        <div class="message-avatar">${avatar}</div>
-                        <div class="message-name">${name}</div>
-                    </div>
-                    <div class="message-content">${contentHtml}</div>
-                </div>
-            `;
-        }
-
-        function renderContent(msg) {
-            const typeIcons = { note: '📝', table: '📊', todo: '✅', diagram: '📈', chart: '📉' };
-            const typeName = { note: 'Not', table: 'Tablo', todo: 'Yapılacaklar', diagram: 'Diyagram', chart: 'Grafik' };
-            
-            let html = `<span class="card-type-badge badge-${msg.contentType}">${typeIcons[msg.contentType]} ${typeName[msg.contentType]}</span>`;
-            
-            if (msg.title) {
-                html += `<div class="card-title">${escapeHtml(msg.title)}</div>`;
-            }
-            
-            html += '<div class="card-content">';
-            
-            try {
-                switch (msg.contentType) {
-                    case 'note':
-                        if (typeof marked !== 'undefined') {
-                            html += `<div class="markdown-content">${marked.parse(msg.content)}</div>`;
-                        } else {
-                            html += `<div>${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>`;
+                if (window.storage) {
+                    try {
+                        const result = await window.storage.get(STORAGE_KEY, true);
+                        if (result && result.value) {
+                            data = JSON.parse(result.value);
+                            return;
                         }
-                        break;
-                    
-                    default:
-                        html += `<div>${escapeHtml(msg.content || '').replace(/\n/g, '<br>')}</div>`;
-                }
-            } catch (error) {
-                console.error('Content render error:', error);
-                html += `<pre>${escapeHtml(String(msg.content || ''))}</pre>`;
-            }
-            
-            html += '</div>';
-            return html;
-        }
-
-        // Send Message
-        async function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            
-            if (!message || !currentChatId) return;
-            
-            // API key kontrolü
-            if (!apiKey) {
-                showAlert('API key bulunamadı! Lütfen ayarlardan ekleyin.', 'error');
-                openSettings();
-                return;
-            }
-            
-            // API key format kontrolü
-            if (!(/^sk-[a-zA-Z0-9-_]{20,}$/.test(apiKey) || /^sk-proj-[a-zA-Z0-9-_]{20,}$/.test(apiKey))) {
-                showAlert('API key formatı geçersiz! Lütfen doğru formatta bir key girin.', 'error');
-                openSettings();
-                return;
-            }
-            
-            const sendBtn = document.getElementById('send-btn');
-            sendBtn.disabled = true;
-            
-            // Add user message
-            const userMessage = {
-                role: 'user',
-                content: message,
-                contentType: currentContentType !== 'chat' ? currentContentType : null,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            await db.collection('chats').doc(currentChatId).collection('messages').add(userMessage);
-            messages.push({ ...userMessage, id: Date.now().toString(), createdAt: new Date() });
-            
-            input.value = '';
-            input.style.height = 'auto';
-            renderMessages();
-            
-            // Show loading
-            showLoadingMessage();
-            
-            try {
-                // Call OpenAI
-                const response = await callOpenAI(message, currentContentType);
-                
-                if (response) {
-                    // Add AI response
-                    const aiMessage = {
-                        role: 'assistant',
-                        content: response.content,
-                        contentType: response.type,
-                        title: response.title,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    await db.collection('chats').doc(currentChatId).collection('messages').add(aiMessage);
-                    messages.push({ ...aiMessage, id: (Date.now() + 1).toString(), createdAt: new Date() });
-                    
-                    // Auto-generate title if first message
-                    if (messages.length === 2) {
-                        await generateChatTitle(message);
-                    }
-                    
-                    // Update chat timestamp
-                    await db.collection('chats').doc(currentChatId).update({
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            } catch (error) {
-                console.error('Send error:', error);
-                
-                // Hata mesajını kullanıcı dostu yap
-                let errorMsg = 'Bir hata oluştu!';
-                
-                if (error.message.includes('Incorrect API key')) {
-                    errorMsg = 'API key hatalı veya geçersiz! Lütfen kontrol edin.';
-                    apiKey = ''; // Temizle
-                    localStorage.removeItem('openai_api_key');
-                } else if (error.message.includes('rate_limit')) {
-                    errorMsg = 'İstek limitine ulaşıldı. Lütfen biraz bekleyin.';
-                } else if (error.message.includes('insufficient_quota')) {
-                    errorMsg = 'OpenAI hesabınızda kredi kalmamış. Lütfen hesabınızı kontrol edin.';
-                } else {
-                    errorMsg = error.message;
-                }
-                
-                showAlert(errorMsg, 'error');
-            } finally {
-                hideLoadingMessage();
-                renderMessages();
-                sendBtn.disabled = false;
-                
-                // Reset to chat type
-                selectType(null, 'chat', '💬');
-            }
-        }
-
-        async function callOpenAI(message, contentType) {
-            let systemPrompt = 'Sen yardımcı bir AI asistanısın. Kullanıcının sorularını detaylı ve açık bir şekilde yanıtla.';
-            
-            if (contentType !== 'chat') {
-                systemPrompt = `Sen Hunerium AI asistanısın. Kullanıcı "${contentType}" tipi içerik istedi. `;
-                
-                switch (contentType) {
-                    case 'note':
-                        systemPrompt += `Markdown formatında düzenli ve profesyonel bir not oluştur. JSON formatında yanıt ver: {"type": "note", "title": "Başlık", "content": "markdown içerik"}`;
-                        break;
-                    case 'table':
-                        systemPrompt += `Markdown tablo formatında veri tablosu oluştur. JSON formatında yanıt ver: {"type": "table", "title": "Başlık", "content": "markdown tablo"}`;
-                        break;
-                    case 'todo':
-                        systemPrompt += `Yapılacaklar listesi oluştur. JSON formatında yanıt ver: {"type": "todo", "title": "Başlık", "content": [{"text": "görev", "completed": false}]}`;
-                        break;
-                }
-            }
-            
-            try {
-                const apiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: selectedModel,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: message }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 2000
-                    })
-                });
-                
-                if (!apiResponse.ok) {
-                    const error = await apiResponse.json();
-                    throw new Error(error.error?.message || 'OpenAI API hatası');
-                }
-                
-                const data = await apiResponse.json();
-                const aiResponse = data.choices[0].message.content;
-                
-                if (contentType === 'chat') {
-                    return { type: null, content: aiResponse };
-                }
-                
-                try {
-                    const parsed = JSON.parse(aiResponse);
-                    return parsed;
-                } catch (e) {
-                    return { type: contentType, title: 'Yanıt', content: aiResponse };
-                }
-            } catch (error) {
-                console.error('OpenAI API Error:', error);
-                throw error;
-            }
-        }
-
-        async function generateChatTitle(firstMessage) {
-            try {
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [
-                            { role: 'system', content: 'Verilen mesajdan 3-5 kelimelik kısa ve açıklayıcı bir başlık oluştur. Sadece başlığı yaz, başka bir şey ekleme.' },
-                            { role: 'user', content: firstMessage }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 20
-                    })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    const title = data.choices[0].message.content.trim();
-                    
-                    await db.collection('chats').doc(currentChatId).update({ title });
-                    
-                    const chat = chats.find(c => c.id === currentChatId);
-                    if (chat) {
-                        chat.title = title;
-                        document.getElementById('chat-title').value = title;
-                        renderChatList();
+                    } catch (e) {
+                        console.log('Cloud storage not available, using localStorage');
                     }
                 }
-            } catch (error) {
-                console.error('Title generation error:', error);
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    data = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.log('Storage load error:', e);
             }
         }
 
-        function showLoadingMessage() {
-            const container = document.getElementById('messages-container');
-            container.insertAdjacentHTML('beforeend', `
-                <div class="message assistant loading-message">
-                    <div class="message-header">
-                        <div class="message-avatar">AI</div>
-                        <div class="message-name">Hunerium AI</div>
+        async function init() {
+            await loadData();
+            renderChannels();
+            if (data.channels.length > 0) {
+                selectChannel(data.selectedChannel || data.channels[0].id);
+            } else {
+                renderEmptyState();
+            }
+        }
+
+        function renderChannels() {
+            const list = document.getElementById('channelList');
+            list.innerHTML = data.channels.map(channel => `
+                <div class="channel-item ${data.selectedChannel === channel.id ? 'active' : ''}" 
+                     onclick="selectChannel('${channel.id}')">
+                    <div class="channel-avatar">${channel.name.charAt(0).toUpperCase()}</div>
+                    <div class="channel-info">
+                        <div class="channel-name">${escapeHtml(channel.name)}</div>
+                        <div class="channel-count">${channel.videos.length} video</div>
                     </div>
-                    <div class="loading-dots">
-                        <div class="loading-dot"></div>
-                        <div class="loading-dot"></div>
-                        <div class="loading-dot"></div>
+                    <button class="delete-channel" onclick="event.stopPropagation(); deleteChannel('${channel.id}')">🗑</button>
+                </div>
+            `).join('');
+        }
+
+        function selectChannel(id) {
+            data.selectedChannel = id;
+            saveData();
+            renderChannels();
+            renderContent();
+        }
+
+        function getSelectedChannel() {
+            return data.channels.find(c => c.id === data.selectedChannel);
+        }
+
+        function openChannelModal() {
+            document.getElementById('channelName').value = '';
+            document.getElementById('channelModalTitle').textContent = 'Yeni Kanal';
+            document.getElementById('channelModal').classList.add('active');
+        }
+
+        function closeChannelModal() {
+            document.getElementById('channelModal').classList.remove('active');
+        }
+
+        function saveChannel() {
+            const name = document.getElementById('channelName').value.trim();
+            if (!name) {
+                showToast('Kanal adı gerekli!', 'error');
+                return;
+            }
+
+            const channel = {
+                id: generateId(),
+                name: name,
+                videos: [],
+                defaults: {
+                    text: ''
+                }
+            };
+
+            data.channels.push(channel);
+            data.selectedChannel = channel.id;
+            saveData();
+            closeChannelModal();
+            renderChannels();
+            renderContent();
+            showToast('Kanal eklendi!', 'success');
+        }
+
+        function deleteChannel(id) {
+            if (!confirm('Bu kanalı silmek istediğinize emin misiniz?')) return;
+            
+            data.channels = data.channels.filter(c => c.id !== id);
+            if (data.selectedChannel === id) {
+                data.selectedChannel = data.channels.length > 0 ? data.channels[0].id : null;
+            }
+            saveData();
+            renderChannels();
+            if (data.selectedChannel) {
+                renderContent();
+            } else {
+                renderEmptyState();
+            }
+            showToast('Kanal silindi!', 'success');
+        }
+
+        function renderContent() {
+            const channel = getSelectedChannel();
+            if (!channel) {
+                renderEmptyState();
+                return;
+            }
+
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title">${escapeHtml(channel.name)}</h2>
+                        <p class="content-subtitle">${channel.videos.length} video</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openVideoModal()">
+                        + Video Ekle
+                    </button>
+                </div>
+
+                <div class="defaults-section">
+                    <div class="defaults-header" onclick="toggleDefaults()">
+                        <div class="defaults-title">
+                            📌 Sabitler
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openDefaultsModal()">
+                            Düzenle
+                        </button>
+                    </div>
+                    <div class="defaults-content ${!channel.defaults.text ? 'collapsed' : ''}" id="defaultsContent">
+                        ${channel.defaults.text ? escapeHtml(channel.defaults.text) : '<span style="color: var(--text-muted); font-style: italic;">Henüz sabit değer eklenmemiş</span>'}
                     </div>
                 </div>
-            `);
-            scrollToBottom();
+
+                <div class="tabs">
+                    <button class="tab ${currentView === 'grid' ? 'active' : ''}" onclick="switchView('grid')">📱 Kart Görünümü</button>
+                    <button class="tab ${currentView === 'table' ? 'active' : ''}" onclick="switchView('table')">📋 Tablo Görünümü</button>
+                </div>
+
+                <div id="videoContainer">
+                    ${channel.videos.length === 0 ? renderVideoEmptyState() : 
+                      currentView === 'grid' ? renderVideoGrid(channel) : renderVideoTable(channel)}
+                </div>
+            `;
         }
 
-        function hideLoadingMessage() {
-            const loading = document.querySelector('.loading-message');
-            if (loading) loading.remove();
+        function renderVideoEmptyState() {
+            return `
+                <div class="empty-state">
+                    <div class="empty-icon">📱</div>
+                    <h3 class="empty-title">Henüz video yok</h3>
+                    <p class="empty-text">Bu kanala ilk videonuzu ekleyin</p>
+                    <button class="btn btn-primary" onclick="openVideoModal()">+ Video Ekle</button>
+                </div>
+            `;
         }
 
-        // Content Type Picker
-        function toggleTypePicker() {
-            const picker = document.getElementById('type-picker');
-            picker.classList.toggle('show');
+        function renderVideoGrid(channel) {
+            return `
+                <div class="video-grid">
+                    ${channel.videos.map(video => `
+                        <div class="video-card ${video.completed ? 'completed' : ''}">
+                            <div class="video-frame">
+                                <div class="video-frame-icon">📱</div>
+                                <div class="video-frame-text">YouTube Short</div>
+                                <div class="video-badges">
+                                    ${video.completed ? '<span class="badge badge-completed">✓ Tamamlandı</span>' : ''}
+                                    ${video.audioName ? '<span class="badge badge-audio">🎵 Ses</span>' : ''}
+                                    ${video.videoName ? (video.videoApproved ? 
+                                        '<span class="badge badge-video-approved">✓ Onaylandı</span>' : 
+                                        '<span class="badge badge-video-pending">⏳ Onay Bekliyor</span>') : ''}
+                                </div>
+                                ${video.scheduleDate || video.scheduleTime ? `
+                                    <div class="video-schedule">
+                                        ${video.scheduleDate ? `📅 ${formatDate(video.scheduleDate)}` : ''}
+                                        ${video.scheduleTime ? ` 🕐 ${video.scheduleTime}` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="video-content">
+                                <h4 class="video-title">${escapeHtml(video.title)}</h4>
+                                ${video.description ? `<p class="video-description">${escapeHtml(video.description)}</p>` : ''}
+                                ${video.tags ? `
+                                    <div class="video-tags">
+                                        ${video.tags.split(',').map(t => t.trim()).filter(t => t).slice(0, 4).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                                <div class="video-actions">
+                                    <button class="btn btn-xs ${video.completed ? 'btn-secondary' : 'btn-success'}" onclick="toggleComplete('${video.id}')">
+                                        ${video.completed ? '↩ Geri Al' : '✓ Tamamla'}
+                                    </button>
+                                    ${video.audioBase64 ? `<button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥 Ses</button>` : ''}
+                                    ${video.videoName && !video.videoApproved ? `<button class="btn btn-xs btn-success" onclick="approveVideo('${video.id}')">✓ Onayla</button>` : ''}
+                                    <button class="btn btn-xs btn-secondary" onclick="editVideo('${video.id}')">✏️</button>
+                                    <button class="btn btn-xs btn-danger" onclick="deleteVideo('${video.id}')">🗑</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
-        function selectType(event, type, icon) {
-            currentContentType = type;
-            document.getElementById('selected-type-icon').textContent = icon;
-            document.getElementById('type-picker').classList.remove('show');
+        function renderVideoTable(channel) {
+            return `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Durum</th>
+                                <th>Başlık</th>
+                                <th>Açıklama</th>
+                                <th>Etiketler</th>
+                                <th>Tarih/Saat</th>
+                                <th>Ses</th>
+                                <th>Video</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${channel.videos.map(video => `
+                                <tr class="${video.completed ? 'completed' : ''}">
+                                    <td>
+                                        <div class="checkbox-wrapper" onclick="toggleComplete('${video.id}')">
+                                            <div class="checkbox ${video.completed ? 'checked' : ''}">${video.completed ? '✓' : ''}</div>
+                                        </div>
+                                    </td>
+                                    <td class="table-title">${escapeHtml(video.title)}</td>
+                                    <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        ${escapeHtml(video.description || '-')}
+                                    </td>
+                                    <td>
+                                        <div class="table-tags">
+                                            ${video.tags ? video.tags.split(',').map(t => t.trim()).filter(t => t).slice(0, 2).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('') : '-'}
+                                        </div>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        ${video.scheduleDate ? `📅 ${formatDate(video.scheduleDate)}` : ''}
+                                        ${video.scheduleTime ? `<br>🕐 ${video.scheduleTime}` : ''}
+                                        ${!video.scheduleDate && !video.scheduleTime ? '-' : ''}
+                                    </td>
+                                    <td>
+                                        ${video.audioName ? `
+                                            <div style="display: flex; align-items: center; gap: 6px;">
+                                                <span style="font-size: 0.8rem; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🎵 ${escapeHtml(video.audioName)}</span>
+                                                <button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥</button>
+                                            </div>
+                                        ` : '-'}
+                                    </td>
+                                    <td>
+                                        ${video.videoName ? `
+                                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                <span class="status-badge ${video.videoApproved ? 'status-approved' : 'status-pending'}">
+                                                    ${video.videoApproved ? '✓ Onaylandı' : '⏳ Onay Bekliyor'}
+                                                </span>
+                                                ${!video.videoApproved ? `<button class="btn btn-xs btn-success" onclick="approveVideo('${video.id}')">Onayla</button>` : ''}
+                                            </div>
+                                        ` : '-'}
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <button class="btn btn-xs btn-secondary" onclick="editVideo('${video.id}')">✏️</button>
+                                            <button class="btn btn-xs btn-danger" onclick="deleteVideo('${video.id}')">🗑</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
         }
 
-        // UI Functions
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
+        function renderEmptyState() {
+            const main = document.getElementById('mainContent');
+            main.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📺</div>
+                    <h3 class="empty-title">Hoş Geldiniz!</h3>
+                    <p class="empty-text">YouTube Shorts videolarınızı organize etmeye başlamak için ilk kanalınızı oluşturun</p>
+                    <button class="btn btn-primary" onclick="openChannelModal()">+ Kanal Oluştur</button>
+                </div>
+            `;
         }
 
-        function scrollToBottom() {
-            const chatArea = document.getElementById('chat-area');
-            chatArea.scrollTop = chatArea.scrollHeight;
+        function switchView(view) {
+            currentView = view;
+            renderContent();
         }
 
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+        function toggleDefaults() {
+            const content = document.getElementById('defaultsContent');
+            content.classList.toggle('collapsed');
         }
 
-        function toggleTheme() {
-            theme = theme === 'light' ? 'dark' : 'light';
-            setTheme(theme);
-        }
+        function openVideoModal(videoId = null) {
+            const channel = getSelectedChannel();
+            editingVideoId = videoId;
+            audioBase64 = null;
+            audioName = null;
+            videoBase64 = null;
+            videoName = null;
 
-        function setTheme(newTheme) {
-            theme = newTheme;
-            localStorage.setItem('theme', theme);
-            applyTheme();
-        }
-
-        function applyTheme() {
-            if (theme === 'auto') {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-                document.getElementById('theme-icon').textContent = isDark ? '☀️' : '🌙';
+            if (videoId) {
+                const video = channel.videos.find(v => v.id === videoId);
+                document.getElementById('videoTitle').value = video.title;
+                document.getElementById('videoDescription').value = video.description || '';
+                document.getElementById('videoTags').value = video.tags || '';
+                document.getElementById('videoDate').value = video.scheduleDate || '';
+                document.getElementById('videoTime').value = video.scheduleTime || '';
+                document.getElementById('videoText').value = video.text || '';
+                document.getElementById('audioFileName').textContent = video.audioName || '';
+                document.getElementById('videoFileName').textContent = video.videoName || '';
+                document.getElementById('videoModalTitle').textContent = 'Videoyu Düzenle';
+                audioBase64 = video.audioBase64;
+                audioName = video.audioName;
+                videoBase64 = video.videoBase64;
+                videoName = video.videoName;
             } else {
-                document.documentElement.setAttribute('data-theme', theme);
-                document.getElementById('theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
+                document.getElementById('videoTitle').value = '';
+                document.getElementById('videoDescription').value = '';
+                document.getElementById('videoTags').value = '';
+                document.getElementById('videoDate').value = '';
+                document.getElementById('videoTime').value = '';
+                document.getElementById('videoText').value = '';
+                document.getElementById('audioFileName').textContent = '';
+                document.getElementById('videoFileName').textContent = '';
+                document.getElementById('videoModalTitle').textContent = 'Yeni Video';
+            }
+
+            document.getElementById('videoModal').classList.add('active');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('active');
+            editingVideoId = null;
+            audioBase64 = null;
+            audioName = null;
+            videoBase64 = null;
+            videoName = null;
+        }
+
+        function handleAudioUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                audioName = file.name;
+                document.getElementById('audioFileName').textContent = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    audioBase64 = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
         }
 
-        function openSettings() {
-            document.getElementById('settings-modal').classList.add('show');
-            document.getElementById('theme-select').value = theme;
-            document.getElementById('model-select').value = selectedModel;
-            document.getElementById('api-key-input').value = apiKey;
-            validateApiKey();
-        }
-
-        function closeSettings() {
-            const newApiKey = document.getElementById('api-key-input').value.trim();
-            
-            if (newApiKey && validateApiKey()) {
-                apiKey = newApiKey;
-                localStorage.setItem('openai_api_key', apiKey);
-                showAlert('API key kaydedildi!', 'success');
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                videoName = file.name;
+                document.getElementById('videoFileName').textContent = file.name;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    videoBase64 = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
-            
-            selectedModel = document.getElementById('model-select').value;
-            localStorage.setItem('model', selectedModel);
-            
-            document.getElementById('settings-modal').classList.remove('show');
         }
 
-        // Utility Functions
+        function editVideo(id) {
+            openVideoModal(id);
+        }
+
+        function saveVideo() {
+            const channel = getSelectedChannel();
+            const title = document.getElementById('videoTitle').value.trim();
+            const description = document.getElementById('videoDescription').value.trim();
+            const tags = document.getElementById('videoTags').value.trim();
+            const scheduleDate = document.getElementById('videoDate').value;
+            const scheduleTime = document.getElementById('videoTime').value;
+            const text = document.getElementById('videoText').value.trim();
+
+            if (!title) {
+                showToast('Başlık gerekli!', 'error');
+                return;
+            }
+
+            if (editingVideoId) {
+                const video = channel.videos.find(v => v.id === editingVideoId);
+                const hadVideo = video.videoName;
+                video.title = title;
+                video.description = description;
+                video.tags = tags;
+                video.scheduleDate = scheduleDate;
+                video.scheduleTime = scheduleTime;
+                video.text = text;
+                if (audioBase64) {
+                    video.audioBase64 = audioBase64;
+                    video.audioName = audioName;
+                }
+                if (videoBase64) {
+                    video.videoBase64 = videoBase64;
+                    video.videoName = videoName;
+                    if (!hadVideo) {
+                        video.videoApproved = false;
+                    }
+                }
+            } else {
+                channel.videos.push({
+                    id: generateId(),
+                    title: title,
+                    description: description,
+                    tags: tags,
+                    scheduleDate: scheduleDate,
+                    scheduleTime: scheduleTime,
+                    text: text,
+                    audioBase64: audioBase64,
+                    audioName: audioName,
+                    videoBase64: videoBase64,
+                    videoName: videoName,
+                    videoApproved: false,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            saveData();
+            closeVideoModal();
+            renderContent();
+            renderChannels();
+            showToast(editingVideoId ? 'Video güncellendi!' : 'Video eklendi!', 'success');
+        }
+
+        function deleteVideo(id) {
+            if (!confirm('Bu videoyu silmek istediğinize emin misiniz?')) return;
+            
+            const channel = getSelectedChannel();
+            channel.videos = channel.videos.filter(v => v.id !== id);
+            saveData();
+            renderContent();
+            renderChannels();
+            showToast('Video silindi!', 'success');
+        }
+
+        function toggleComplete(id) {
+            const channel = getSelectedChannel();
+            const video = channel.videos.find(v => v.id === id);
+            video.completed = !video.completed;
+            saveData();
+            renderContent();
+            showToast(video.completed ? 'Video tamamlandı!' : 'Video geri alındı!', 'success');
+        }
+
+        function approveVideo(id) {
+            const channel = getSelectedChannel();
+            const video = channel.videos.find(v => v.id === id);
+            video.videoApproved = true;
+            saveData();
+            renderContent();
+            showToast('Video onaylandı!', 'success');
+        }
+
+        function downloadAudio(id) {
+            const channel = getSelectedChannel();
+            const video = channel.videos.find(v => v.id === id);
+            if (video.audioBase64) {
+                const link = document.createElement('a');
+                link.href = video.audioBase64;
+                link.download = video.audioName || 'audio.mp3';
+                link.click();
+                showToast('Ses dosyası indiriliyor!', 'success');
+            }
+        }
+
+        function openDefaultsModal() {
+            const channel = getSelectedChannel();
+            document.getElementById('defaultText').value = channel.defaults.text || '';
+            document.getElementById('defaultsModal').classList.add('active');
+        }
+
+        function closeDefaultsModal() {
+            document.getElementById('defaultsModal').classList.remove('active');
+        }
+
+        function saveDefaults() {
+            const channel = getSelectedChannel();
+            channel.defaults = {
+                text: document.getElementById('defaultText').value.trim()
+            };
+            saveData();
+            closeDefaultsModal();
+            renderContent();
+            showToast('Sabitler kaydedildi!', 'success');
+        }
+
+        function exportData() {
+            const exportObj = JSON.parse(JSON.stringify(data));
+            // Remove large base64 data for smaller export
+            exportObj.channels.forEach(channel => {
+                channel.videos.forEach(video => {
+                    if (video.audioBase64) {
+                        video.hasAudio = true;
+                        delete video.audioBase64;
+                    }
+                    if (video.videoBase64) {
+                        video.hasVideo = true;
+                        delete video.videoBase64;
+                    }
+                });
+            });
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'youtube-shorts-data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Veriler dışa aktarıldı!', 'success');
+        }
+
+        function importDataClick() {
+            document.getElementById('importFile').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (imported.channels) {
+                            data = imported;
+                            saveData();
+                            renderChannels();
+                            if (data.selectedChannel) {
+                                renderContent();
+                            } else if (data.channels.length > 0) {
+                                selectChannel(data.channels[0].id);
+                            } else {
+                                renderEmptyState();
+                            }
+                            showToast('Veriler içe aktarıldı!', 'success');
+                        } else {
+                            showToast('Geçersiz dosya formatı!', 'error');
+                        }
+                    } catch (err) {
+                        showToast('Dosya okunamadı!', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function generateId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
         function escapeHtml(text) {
-            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        function formatRelativeTime(date) {
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (minutes < 1) return 'Şimdi';
-            if (minutes < 60) return `${minutes}dk`;
-            if (hours < 24) return `${hours}sa`;
-            if (days < 7) return `${days}g`;
-            return date.toLocaleDateString('tr-TR', { month: 'short', day: 'numeric' });
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
-        // Keyboard Shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey && document.activeElement === document.getElementById('message-input')) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span>
+                <span>${escapeHtml(message)}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-        // Close modal on outside click
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'settings-modal') {
-                closeSettings();
-            }
-        });
-
-        // Initialize
-        window.addEventListener('load', () => {
-            theme = localStorage.getItem('theme') || 'light';
-            selectedModel = localStorage.getItem('model') || 'gpt-4o-mini';
-            apiKey = localStorage.getItem('openai_api_key') || '';
-            applyTheme();
-        });
+        init();
     </script>
 </body>
 </html>
