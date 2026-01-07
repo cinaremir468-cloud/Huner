@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Shorts Yöneticisi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #0a0a0a;
@@ -22,14 +22,9 @@
             --warning: #ffaa00;
             --info: #00aaff;
             --gradient-1: linear-gradient(135deg, #ff0033 0%, #ff6600 100%);
-            --gradient-2: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Outfit', sans-serif;
@@ -41,27 +36,13 @@
 
         .bg-pattern {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background-image: 
                 radial-gradient(circle at 20% 20%, var(--accent-glow) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(255, 102, 0, 0.1) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
-        }
-
-        .noise-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.03;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 1;
         }
 
         header {
@@ -73,7 +54,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            backdrop-filter: blur(10px);
         }
 
         .logo {
@@ -83,8 +63,7 @@
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
+            width: 48px; height: 48px;
             background: var(--gradient-1);
             border-radius: 12px;
             display: flex;
@@ -100,13 +79,34 @@
             background: var(--gradient-1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        .header-actions {
+        .sync-status {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 0.85rem;
         }
+
+        .sync-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .sync-dot.offline { background: var(--warning); animation: none; }
+        .sync-dot.syncing { background: var(--info); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-actions { display: flex; gap: 12px; align-items: center; }
 
         .container {
             position: relative;
@@ -165,8 +165,7 @@
         }
 
         .channel-avatar {
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             background: var(--gradient-1);
             display: flex;
@@ -176,10 +175,7 @@
             font-size: 14px;
         }
 
-        .channel-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .channel-info { flex: 1; min-width: 0; }
 
         .channel-name {
             font-weight: 600;
@@ -194,29 +190,19 @@
             color: var(--text-secondary);
         }
 
-        .channel-item.active .channel-count {
-            color: rgba(255, 255, 255, 0.7);
-        }
+        .channel-item.active .channel-count { color: rgba(255,255,255,0.7); }
 
         .delete-channel {
             opacity: 0;
-            background: rgba(255, 0, 0, 0.2);
+            background: rgba(255,0,0,0.2);
             border: none;
             color: #ff4444;
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .channel-item:hover .delete-channel {
-            opacity: 1;
-        }
-
-        .delete-channel:hover {
-            background: rgba(255, 0, 0, 0.4);
-        }
+        .channel-item:hover .delete-channel { opacity: 1; }
 
         .main-content {
             flex: 1;
@@ -231,15 +217,8 @@
             margin-bottom: 2rem;
         }
 
-        .content-title {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .content-subtitle {
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
+        .content-title { font-size: 2rem; font-weight: 700; }
+        .content-subtitle { color: var(--text-secondary); margin-top: 4px; }
 
         .tabs {
             display: flex;
@@ -264,14 +243,8 @@
             transition: all 0.3s ease;
         }
 
-        .tab:hover {
-            color: var(--text-primary);
-        }
-
-        .tab.active {
-            background: var(--accent);
-            color: white;
-        }
+        .tab:hover { color: var(--text-primary); }
+        .tab.active { background: var(--accent); color: white; }
 
         .btn {
             padding: 12px 24px;
@@ -304,49 +277,34 @@
             border: 1px solid var(--border);
         }
 
-        .btn-secondary:hover {
-            border-color: var(--accent);
-        }
+        .btn-secondary:hover { border-color: var(--accent); }
 
         .btn-danger {
-            background: rgba(255, 0, 0, 0.1);
+            background: rgba(255,0,0,0.1);
             color: #ff4444;
-            border: 1px solid rgba(255, 0, 0, 0.3);
-        }
-
-        .btn-danger:hover {
-            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255,0,0,0.3);
         }
 
         .btn-success {
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(0,255,136,0.1);
             color: var(--success);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-        }
-
-        .btn-success:hover {
-            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0,255,136,0.3);
         }
 
         .btn-info {
-            background: rgba(0, 170, 255, 0.1);
+            background: rgba(0,170,255,0.1);
             color: var(--info);
-            border: 1px solid rgba(0, 170, 255, 0.3);
+            border: 1px solid rgba(0,170,255,0.3);
         }
 
-        .btn-info:hover {
-            background: rgba(0, 170, 255, 0.2);
+        .btn-warning {
+            background: rgba(255,170,0,0.1);
+            color: var(--warning);
+            border: 1px solid rgba(255,170,0,0.3);
         }
 
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.8rem;
-        }
-
-        .btn-xs {
-            padding: 4px 10px;
-            font-size: 0.75rem;
-        }
+        .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+        .btn-xs { padding: 4px 10px; font-size: 0.75rem; }
 
         .video-grid {
             display: grid;
@@ -365,13 +323,10 @@
         .video-card:hover {
             border-color: var(--accent);
             transform: translateY(-4px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
 
-        .video-card.completed {
-            opacity: 0.7;
-        }
-
+        .video-card.completed { opacity: 0.7; }
         .video-card.completed .video-title {
             text-decoration: line-through;
             color: var(--text-muted);
@@ -388,20 +343,12 @@
             max-height: 280px;
         }
 
-        .video-frame-icon {
-            font-size: 48px;
-            margin-bottom: 8px;
-        }
-
-        .video-frame-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+        .video-frame-icon { font-size: 48px; margin-bottom: 8px; }
+        .video-frame-text { font-size: 0.85rem; color: var(--text-muted); }
 
         .video-badges {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 12px; right: 12px;
             display: flex;
             flex-direction: column;
             gap: 6px;
@@ -417,42 +364,22 @@
             gap: 4px;
         }
 
-        .badge-audio {
-            background: var(--success);
-            color: black;
-        }
-
-        .badge-video-pending {
-            background: var(--warning);
-            color: black;
-        }
-
-        .badge-video-approved {
-            background: var(--info);
-            color: white;
-        }
-
-        .badge-completed {
-            background: var(--success);
-            color: black;
-        }
+        .badge-audio { background: var(--success); color: black; }
+        .badge-no-video { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px dashed var(--border); }
+        .badge-pending { background: var(--warning); color: black; }
+        .badge-approved { background: var(--info); color: white; }
+        .badge-completed { background: var(--success); color: black; }
 
         .video-schedule {
             position: absolute;
-            bottom: 12px;
-            left: 12px;
-            background: rgba(0, 0, 0, 0.8);
+            bottom: 12px; left: 12px;
+            background: rgba(0,0,0,0.8);
             padding: 6px 12px;
             border-radius: 8px;
             font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
-        .video-content {
-            padding: 1rem;
-        }
+        .video-content { padding: 1rem; }
 
         .video-title {
             font-weight: 600;
@@ -507,7 +434,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1000px;
+            min-width: 1100px;
         }
 
         th, td {
@@ -525,21 +452,9 @@
             color: var(--text-secondary);
         }
 
-        tr:hover td {
-            background: var(--bg-tertiary);
-        }
-
-        tr.completed td {
-            opacity: 0.6;
-        }
-
-        tr.completed .table-title {
-            text-decoration: line-through;
-        }
-
-        td {
-            font-size: 0.9rem;
-        }
+        tr:hover td { background: var(--bg-tertiary); }
+        tr.completed td { opacity: 0.6; }
+        tr.completed .table-title { text-decoration: line-through; }
 
         .table-title {
             font-weight: 600;
@@ -547,19 +462,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .table-tags {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-            max-width: 150px;
-        }
-
-        .table-actions {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
         }
 
         .status-badge {
@@ -573,25 +475,10 @@
             white-space: nowrap;
         }
 
-        .status-ready {
-            background: rgba(0, 255, 136, 0.1);
-            color: var(--success);
-        }
-
-        .status-pending {
-            background: rgba(255, 170, 0, 0.1);
-            color: var(--warning);
-        }
-
-        .status-approved {
-            background: rgba(0, 170, 255, 0.1);
-            color: var(--info);
-        }
-
-        .status-completed {
-            background: rgba(0, 255, 136, 0.2);
-            color: var(--success);
-        }
+        .status-no-video { background: var(--bg-tertiary); color: var(--text-muted); }
+        .status-pending { background: rgba(255,170,0,0.1); color: var(--warning); }
+        .status-approved { background: rgba(0,170,255,0.1); color: var(--info); }
+        .status-completed { background: rgba(0,255,136,0.2); color: var(--success); }
 
         .defaults-section {
             background: var(--bg-card);
@@ -605,7 +492,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem;
             cursor: pointer;
         }
 
@@ -618,19 +504,16 @@
         }
 
         .defaults-content {
+            margin-top: 1rem;
             color: var(--text-secondary);
             font-size: 0.9rem;
             white-space: pre-wrap;
             line-height: 1.6;
         }
 
-        .defaults-content.collapsed {
-            display: none;
-        }
+        .defaults-content.collapsed { display: none; }
 
-        .form-group {
-            margin-bottom: 1rem;
-        }
+        .form-group { margin-bottom: 1rem; }
 
         .form-label {
             display: block;
@@ -640,7 +523,7 @@
             margin-bottom: 6px;
         }
 
-        .form-input, .form-textarea, .form-select {
+        .form-input, .form-textarea {
             width: 100%;
             padding: 12px 14px;
             background: var(--bg-tertiary);
@@ -652,16 +535,13 @@
             transition: all 0.3s ease;
         }
 
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
+        .form-input:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px var(--accent-glow);
         }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
+        .form-textarea { resize: vertical; min-height: 80px; }
 
         .form-row {
             display: grid;
@@ -681,28 +561,19 @@
 
         .file-upload:hover {
             border-color: var(--accent);
-            background: rgba(255, 0, 51, 0.05);
+            background: rgba(255,0,51,0.05);
         }
 
         .file-upload input {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             opacity: 0;
             cursor: pointer;
         }
 
-        .file-upload-icon {
-            font-size: 1.5rem;
-            margin-bottom: 4px;
-        }
-
-        .file-upload-text {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
+        .file-upload-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .file-upload-text { color: var(--text-secondary); font-size: 0.85rem; }
 
         .file-name {
             margin-top: 6px;
@@ -713,11 +584,9 @@
 
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
@@ -728,10 +597,7 @@
             transition: all 0.3s ease;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
 
         .modal {
             background: var(--bg-secondary);
@@ -745,9 +611,7 @@
             transition: all 0.3s ease;
         }
 
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
+        .modal-overlay.active .modal { transform: scale(1); }
 
         .modal-header {
             padding: 1.5rem;
@@ -757,30 +621,21 @@
             justify-content: space-between;
         }
 
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
+        .modal-title { font-size: 1.25rem; font-weight: 700; }
 
         .modal-close {
-            width: 36px;
-            height: 36px;
+            width: 36px; height: 36px;
             border-radius: 10px;
             border: none;
             background: var(--bg-tertiary);
             color: var(--text-primary);
             cursor: pointer;
             font-size: 1.2rem;
-            transition: all 0.3s ease;
         }
 
-        .modal-close:hover {
-            background: var(--accent);
-        }
+        .modal-close:hover { background: var(--accent); }
 
-        .modal-body {
-            padding: 1.5rem;
-        }
+        .modal-body { padding: 1.5rem; }
 
         .modal-footer {
             padding: 1.5rem;
@@ -795,27 +650,13 @@
             padding: 4rem 2rem;
         }
 
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-text {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .empty-text { color: var(--text-secondary); margin-bottom: 1.5rem; }
 
         .toast-container {
             position: fixed;
-            bottom: 2rem;
-            right: 2rem;
+            bottom: 2rem; right: 2rem;
             z-index: 2000;
             display: flex;
             flex-direction: column;
@@ -830,28 +671,16 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             animation: slideIn 0.3s ease;
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .toast-success {
-            border-color: var(--success);
-        }
-
-        .toast-icon {
-            font-size: 1.2rem;
-        }
+        .toast-success { border-color: var(--success); }
 
         .checkbox-wrapper {
             display: flex;
@@ -861,8 +690,7 @@
         }
 
         .checkbox {
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             border: 2px solid var(--border);
             border-radius: 4px;
             display: flex;
@@ -876,55 +704,60 @@
             border-color: var(--success);
         }
 
-        .checkbox-label {
-            font-size: 0.85rem;
+        .video-preview {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text {
+            margin-top: 1rem;
             color: var(--text-secondary);
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
         @media (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-            
-            .video-grid {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                padding: 1rem;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+            .sidebar { display: none; }
+            .video-grid { grid-template-columns: 1fr; }
+            header { padding: 1rem; }
+            .main-content { padding: 1rem; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="bg-pattern"></div>
-    <div class="noise-overlay"></div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Yükleniyor...</div>
+    </div>
 
     <header>
         <div class="logo">
@@ -932,13 +765,10 @@
             <h1>Shorts Manager</h1>
         </div>
         <div class="header-actions">
-            <button class="btn btn-secondary" onclick="exportData()">
-                📥 Dışa Aktar
-            </button>
-            <button class="btn btn-secondary" onclick="importDataClick()">
-                📤 İçe Aktar
-            </button>
-            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+            <div class="sync-status">
+                <div class="sync-dot" id="syncDot"></div>
+                <span id="syncText">Bağlandı</span>
+            </div>
         </div>
     </header>
 
@@ -950,7 +780,6 @@
                 + Kanal Ekle
             </button>
         </aside>
-
         <main class="main-content" id="mainContent"></main>
     </div>
 
@@ -958,7 +787,7 @@
     <div class="modal-overlay" id="channelModal">
         <div class="modal">
             <div class="modal-header">
-                <h3 class="modal-title" id="channelModalTitle">Yeni Kanal</h3>
+                <h3 class="modal-title">Yeni Kanal</h3>
                 <button class="modal-close" onclick="closeChannelModal()">×</button>
             </div>
             <div class="modal-body">
@@ -974,7 +803,7 @@
         </div>
     </div>
 
-    <!-- Video Modal -->
+    <!-- Video Modal (Sadece bilgi girişi) -->
     <div class="modal-overlay" id="videoModal">
         <div class="modal">
             <div class="modal-header">
@@ -1006,20 +835,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">🎵 Ses Dosyası</label>
-                    <div class="file-upload" id="audioUpload">
+                    <div class="file-upload">
                         <div class="file-upload-icon">🎵</div>
                         <div class="file-upload-text">Ses dosyası yüklemek için tıklayın</div>
                         <div class="file-name" id="audioFileName"></div>
                         <input type="file" accept="audio/*" id="audioFile" onchange="handleAudioUpload(event)">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">🎬 Video Dosyası (MP4)</label>
-                    <div class="file-upload" id="videoUpload">
-                        <div class="file-upload-icon">🎬</div>
-                        <div class="file-upload-text">Video dosyası yüklemek için tıklayın</div>
-                        <div class="file-name" id="videoFileName"></div>
-                        <input type="file" accept="video/mp4" id="videoFile" onchange="handleVideoUpload(event)">
                     </div>
                 </div>
                 <div class="form-group">
@@ -1034,6 +854,61 @@
         </div>
     </div>
 
+    <!-- Video Upload Modal (MP4 ekleme) -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">🎬 Video Ekle</h3>
+                <button class="modal-close" onclick="closeUploadModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Video Başlığı</label>
+                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 10px; color: var(--text-primary);" id="uploadVideoTitle"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🎬 Video Dosyası (MP4)</label>
+                    <div class="file-upload">
+                        <div class="file-upload-icon">🎬</div>
+                        <div class="file-upload-text">MP4 dosyası yüklemek için tıklayın</div>
+                        <div class="file-name" id="mp4FileName"></div>
+                        <input type="file" accept="video/mp4,video/*" id="mp4File" onchange="handleMp4Upload(event)">
+                    </div>
+                </div>
+                <div id="videoPreviewContainer" style="display: none; margin-top: 1rem;">
+                    <label class="form-label">Önizleme</label>
+                    <video id="videoPreview" class="video-preview" controls></video>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">İptal</button>
+                <button class="btn btn-warning" onclick="submitForApproval()" id="submitBtn" disabled>
+                    📤 Onaya Gönder
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Watch & Approve Modal -->
+    <div class="modal-overlay" id="watchModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">🎬 Video İzle & Onayla</h3>
+                <button class="modal-close" onclick="closeWatchModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <strong id="watchVideoTitle"></strong>
+                </div>
+                <video id="watchVideoPlayer" class="video-preview" controls style="width: 100%; max-height: 400px;"></video>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeWatchModal()">Kapat</button>
+                <button class="btn btn-success" onclick="approveVideo()">✓ Onayla</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Defaults Modal -->
     <div class="modal-overlay" id="defaultsModal">
         <div class="modal">
@@ -1043,8 +918,8 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="form-label">Sabit Metin (Her videoya eklenecek bilgiler)</label>
-                    <textarea class="form-textarea" id="defaultText" rows="10" placeholder="Buraya sabit kalmasını istediğiniz metni yazın...&#10;&#10;Örnek:&#10;📱 Instagram: @kanalim&#10;🎵 TikTok: @kanalim&#10;📧 İletişim: mail@example.com"></textarea>
+                    <label class="form-label">Sabit Metin</label>
+                    <textarea class="form-textarea" id="defaultText" rows="10" placeholder="Buraya sabit kalmasını istediğiniz metni yazın..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1054,95 +929,120 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
     <script>
-        let data = {
-            channels: [],
-            selectedChannel: null
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCmZYrs4mfx6buuxPSXb6WwZujXyzBQkYE",
+            authDomain: "hunerai.firebaseapp.com",
+            projectId: "hunerai",
+            storageBucket: "hunerai.firebasestorage.app",
+            messagingSenderId: "398760906018",
+            appId: "1:398760906018:web:8693e8534359bc09fb697b",
+            measurementId: "G-2FFSRV4EXN"
         };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // State
+        let channels = [];
+        let selectedChannelId = null;
         let currentView = 'grid';
         let editingVideoId = null;
-        let audioBase64 = null;
-        let audioName = null;
-        let videoBase64 = null;
-        let videoName = null;
+        let uploadingVideoId = null;
+        let watchingVideoId = null;
+        let audioFile = null;
+        let mp4File = null;
 
-        const STORAGE_KEY = 'youtube-shorts-manager';
-
-        async function saveData() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                if (window.storage) {
-                    await window.storage.set(STORAGE_KEY, JSON.stringify(data), true);
-                }
-            } catch (e) {
-                console.log('Storage save error:', e);
-            }
-        }
-
-        async function loadData() {
-            try {
-                if (window.storage) {
-                    try {
-                        const result = await window.storage.get(STORAGE_KEY, true);
-                        if (result && result.value) {
-                            data = JSON.parse(result.value);
-                            return;
-                        }
-                    } catch (e) {
-                        console.log('Cloud storage not available, using localStorage');
-                    }
-                }
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    data = JSON.parse(saved);
-                }
-            } catch (e) {
-                console.log('Storage load error:', e);
-            }
-        }
-
-        async function init() {
-            await loadData();
-            renderChannels();
-            if (data.channels.length > 0) {
-                selectChannel(data.selectedChannel || data.channels[0].id);
+        // Sync Status
+        function updateSyncStatus(status) {
+            const dot = document.getElementById('syncDot');
+            const text = document.getElementById('syncText');
+            
+            if (status === 'connected') {
+                dot.className = 'sync-dot';
+                text.textContent = 'Bağlandı';
+            } else if (status === 'syncing') {
+                dot.className = 'sync-dot syncing';
+                text.textContent = 'Senkronize ediliyor...';
             } else {
-                renderEmptyState();
+                dot.className = 'sync-dot offline';
+                text.textContent = 'Çevrimdışı';
             }
         }
 
+        // Initialize with real-time listener
+        function init() {
+            updateSyncStatus('syncing');
+            
+            // Real-time listener for channels
+            db.collection('shorts_channels').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                channels = [];
+                snapshot.forEach(doc => {
+                    channels.push({ id: doc.id, ...doc.data() });
+                });
+                
+                updateSyncStatus('connected');
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                renderChannels();
+                
+                if (channels.length > 0) {
+                    if (!selectedChannelId || !channels.find(c => c.id === selectedChannelId)) {
+                        selectedChannelId = channels[0].id;
+                    }
+                    renderContent();
+                } else {
+                    renderEmptyState();
+                }
+            }, error => {
+                console.error('Firestore error:', error);
+                updateSyncStatus('offline');
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Bağlantı hatası!', 'error');
+            });
+        }
+
+        // Channel Functions
         function renderChannels() {
             const list = document.getElementById('channelList');
-            list.innerHTML = data.channels.map(channel => `
-                <div class="channel-item ${data.selectedChannel === channel.id ? 'active' : ''}" 
-                     onclick="selectChannel('${channel.id}')">
-                    <div class="channel-avatar">${channel.name.charAt(0).toUpperCase()}</div>
-                    <div class="channel-info">
-                        <div class="channel-name">${escapeHtml(channel.name)}</div>
-                        <div class="channel-count">${channel.videos.length} video</div>
+            list.innerHTML = channels.map(channel => {
+                const videoCount = channel.videos ? channel.videos.length : 0;
+                return `
+                    <div class="channel-item ${selectedChannelId === channel.id ? 'active' : ''}" 
+                         onclick="selectChannel('${channel.id}')">
+                        <div class="channel-avatar">${channel.name.charAt(0).toUpperCase()}</div>
+                        <div class="channel-info">
+                            <div class="channel-name">${escapeHtml(channel.name)}</div>
+                            <div class="channel-count">${videoCount} video</div>
+                        </div>
+                        <button class="delete-channel" onclick="event.stopPropagation(); deleteChannel('${channel.id}')">🗑</button>
                     </div>
-                    <button class="delete-channel" onclick="event.stopPropagation(); deleteChannel('${channel.id}')">🗑</button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function selectChannel(id) {
-            data.selectedChannel = id;
-            saveData();
+            selectedChannelId = id;
             renderChannels();
             renderContent();
         }
 
         function getSelectedChannel() {
-            return data.channels.find(c => c.id === data.selectedChannel);
+            return channels.find(c => c.id === selectedChannelId);
         }
 
         function openChannelModal() {
             document.getElementById('channelName').value = '';
-            document.getElementById('channelModalTitle').textContent = 'Yeni Kanal';
             document.getElementById('channelModal').classList.add('active');
         }
 
@@ -1150,48 +1050,50 @@
             document.getElementById('channelModal').classList.remove('active');
         }
 
-        function saveChannel() {
+        async function saveChannel() {
             const name = document.getElementById('channelName').value.trim();
             if (!name) {
                 showToast('Kanal adı gerekli!', 'error');
                 return;
             }
 
-            const channel = {
-                id: generateId(),
-                name: name,
-                videos: [],
-                defaults: {
-                    text: ''
-                }
-            };
-
-            data.channels.push(channel);
-            data.selectedChannel = channel.id;
-            saveData();
-            closeChannelModal();
-            renderChannels();
-            renderContent();
-            showToast('Kanal eklendi!', 'success');
+            updateSyncStatus('syncing');
+            
+            try {
+                const docRef = await db.collection('shorts_channels').add({
+                    name: name,
+                    videos: [],
+                    defaults: { text: '' },
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                selectedChannelId = docRef.id;
+                closeChannelModal();
+                showToast('Kanal eklendi!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Hata oluştu!', 'error');
+            }
         }
 
-        function deleteChannel(id) {
+        async function deleteChannel(id) {
             if (!confirm('Bu kanalı silmek istediğinize emin misiniz?')) return;
             
-            data.channels = data.channels.filter(c => c.id !== id);
-            if (data.selectedChannel === id) {
-                data.selectedChannel = data.channels.length > 0 ? data.channels[0].id : null;
+            updateSyncStatus('syncing');
+            
+            try {
+                await db.collection('shorts_channels').doc(id).delete();
+                if (selectedChannelId === id) {
+                    selectedChannelId = channels.length > 1 ? channels.find(c => c.id !== id)?.id : null;
+                }
+                showToast('Kanal silindi!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Hata oluştu!', 'error');
             }
-            saveData();
-            renderChannels();
-            if (data.selectedChannel) {
-                renderContent();
-            } else {
-                renderEmptyState();
-            }
-            showToast('Kanal silindi!', 'success');
         }
 
+        // Content Rendering
         function renderContent() {
             const channel = getSelectedChannel();
             if (!channel) {
@@ -1199,40 +1101,38 @@
                 return;
             }
 
+            const videos = channel.videos || [];
             const main = document.getElementById('mainContent');
+            
             main.innerHTML = `
                 <div class="content-header">
                     <div>
                         <h2 class="content-title">${escapeHtml(channel.name)}</h2>
-                        <p class="content-subtitle">${channel.videos.length} video</p>
+                        <p class="content-subtitle">${videos.length} video</p>
                     </div>
                     <button class="btn btn-primary" onclick="openVideoModal()">
-                        + Video Ekle
+                        + Video Bilgisi Ekle
                     </button>
                 </div>
 
                 <div class="defaults-section">
                     <div class="defaults-header" onclick="toggleDefaults()">
-                        <div class="defaults-title">
-                            📌 Sabitler
-                        </div>
-                        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openDefaultsModal()">
-                            Düzenle
-                        </button>
+                        <div class="defaults-title">📌 Sabitler</div>
+                        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openDefaultsModal()">Düzenle</button>
                     </div>
-                    <div class="defaults-content ${!channel.defaults.text ? 'collapsed' : ''}" id="defaultsContent">
-                        ${channel.defaults.text ? escapeHtml(channel.defaults.text) : '<span style="color: var(--text-muted); font-style: italic;">Henüz sabit değer eklenmemiş</span>'}
+                    <div class="defaults-content ${!channel.defaults?.text ? 'collapsed' : ''}" id="defaultsContent">
+                        ${channel.defaults?.text ? escapeHtml(channel.defaults.text) : '<span style="color: var(--text-muted);">Henüz sabit eklenmemiş</span>'}
                     </div>
                 </div>
 
                 <div class="tabs">
-                    <button class="tab ${currentView === 'grid' ? 'active' : ''}" onclick="switchView('grid')">📱 Kart Görünümü</button>
-                    <button class="tab ${currentView === 'table' ? 'active' : ''}" onclick="switchView('table')">📋 Tablo Görünümü</button>
+                    <button class="tab ${currentView === 'grid' ? 'active' : ''}" onclick="switchView('grid')">📱 Kart</button>
+                    <button class="tab ${currentView === 'table' ? 'active' : ''}" onclick="switchView('table')">📋 Tablo</button>
                 </div>
 
                 <div id="videoContainer">
-                    ${channel.videos.length === 0 ? renderVideoEmptyState() : 
-                      currentView === 'grid' ? renderVideoGrid(channel) : renderVideoTable(channel)}
+                    ${videos.length === 0 ? renderVideoEmptyState() : 
+                      currentView === 'grid' ? renderVideoGrid(videos) : renderVideoTable(videos)}
                 </div>
             `;
         }
@@ -1242,26 +1142,26 @@
                 <div class="empty-state">
                     <div class="empty-icon">📱</div>
                     <h3 class="empty-title">Henüz video yok</h3>
-                    <p class="empty-text">Bu kanala ilk videonuzu ekleyin</p>
-                    <button class="btn btn-primary" onclick="openVideoModal()">+ Video Ekle</button>
+                    <p class="empty-text">Önce video bilgilerini ekleyin, sonra MP4 yükleyin</p>
+                    <button class="btn btn-primary" onclick="openVideoModal()">+ Video Bilgisi Ekle</button>
                 </div>
             `;
         }
 
-        function renderVideoGrid(channel) {
+        function renderVideoGrid(videos) {
             return `
                 <div class="video-grid">
-                    ${channel.videos.map(video => `
+                    ${videos.map(video => `
                         <div class="video-card ${video.completed ? 'completed' : ''}">
                             <div class="video-frame">
                                 <div class="video-frame-icon">📱</div>
                                 <div class="video-frame-text">YouTube Short</div>
                                 <div class="video-badges">
                                     ${video.completed ? '<span class="badge badge-completed">✓ Tamamlandı</span>' : ''}
-                                    ${video.audioName ? '<span class="badge badge-audio">🎵 Ses</span>' : ''}
-                                    ${video.videoName ? (video.videoApproved ? 
-                                        '<span class="badge badge-video-approved">✓ Onaylandı</span>' : 
-                                        '<span class="badge badge-video-pending">⏳ Onay Bekliyor</span>') : ''}
+                                    ${video.audioUrl ? '<span class="badge badge-audio">🎵 Ses</span>' : ''}
+                                    ${!video.videoUrl ? '<span class="badge badge-no-video">Video Yok</span>' : 
+                                      video.status === 'pending' ? '<span class="badge badge-pending">⏳ Onay Bekliyor</span>' :
+                                      '<span class="badge badge-approved">✓ Onaylandı</span>'}
                                 </div>
                                 ${video.scheduleDate || video.scheduleTime ? `
                                     <div class="video-schedule">
@@ -1279,11 +1179,17 @@
                                     </div>
                                 ` : ''}
                                 <div class="video-actions">
-                                    <button class="btn btn-xs ${video.completed ? 'btn-secondary' : 'btn-success'}" onclick="toggleComplete('${video.id}')">
-                                        ${video.completed ? '↩ Geri Al' : '✓ Tamamla'}
-                                    </button>
-                                    ${video.audioBase64 ? `<button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥 Ses</button>` : ''}
-                                    ${video.videoName && !video.videoApproved ? `<button class="btn btn-xs btn-success" onclick="approveVideo('${video.id}')">✓ Onayla</button>` : ''}
+                                    ${!video.completed ? `
+                                        <button class="btn btn-xs btn-success" onclick="toggleComplete('${video.id}')">✓ Tamamla</button>
+                                    ` : `
+                                        <button class="btn btn-xs btn-secondary" onclick="toggleComplete('${video.id}')">↩ Geri Al</button>
+                                    `}
+                                    ${video.audioUrl ? `<button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥 Ses</button>` : ''}
+                                    ${!video.videoUrl ? `
+                                        <button class="btn btn-xs btn-warning" onclick="openUploadModal('${video.id}')">🎬 Video Ekle</button>
+                                    ` : video.status === 'pending' ? `
+                                        <button class="btn btn-xs btn-success" onclick="openWatchModal('${video.id}')">👁 İzle & Onayla</button>
+                                    ` : ''}
                                     <button class="btn btn-xs btn-secondary" onclick="editVideo('${video.id}')">✏️</button>
                                     <button class="btn btn-xs btn-danger" onclick="deleteVideo('${video.id}')">🗑</button>
                                 </div>
@@ -1294,7 +1200,7 @@
             `;
         }
 
-        function renderVideoTable(channel) {
+        function renderVideoTable(videos) {
             return `
                 <div class="table-container">
                     <table>
@@ -1303,15 +1209,14 @@
                                 <th>Durum</th>
                                 <th>Başlık</th>
                                 <th>Açıklama</th>
-                                <th>Etiketler</th>
                                 <th>Tarih/Saat</th>
                                 <th>Ses</th>
-                                <th>Video</th>
+                                <th>Video Durumu</th>
                                 <th>İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${channel.videos.map(video => `
+                            ${videos.map(video => `
                                 <tr class="${video.completed ? 'completed' : ''}">
                                     <td>
                                         <div class="checkbox-wrapper" onclick="toggleComplete('${video.id}')">
@@ -1319,13 +1224,8 @@
                                         </div>
                                     </td>
                                     <td class="table-title">${escapeHtml(video.title)}</td>
-                                    <td style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                         ${escapeHtml(video.description || '-')}
-                                    </td>
-                                    <td>
-                                        <div class="table-tags">
-                                            ${video.tags ? video.tags.split(',').map(t => t.trim()).filter(t => t).slice(0, 2).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('') : '-'}
-                                        </div>
                                     </td>
                                     <td style="white-space: nowrap;">
                                         ${video.scheduleDate ? `📅 ${formatDate(video.scheduleDate)}` : ''}
@@ -1333,28 +1233,24 @@
                                         ${!video.scheduleDate && !video.scheduleTime ? '-' : ''}
                                     </td>
                                     <td>
-                                        ${video.audioName ? `
-                                            <div style="display: flex; align-items: center; gap: 6px;">
-                                                <span style="font-size: 0.8rem; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🎵 ${escapeHtml(video.audioName)}</span>
-                                                <button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥</button>
-                                            </div>
+                                        ${video.audioUrl ? `
+                                            <button class="btn btn-xs btn-info" onclick="downloadAudio('${video.id}')">📥 İndir</button>
                                         ` : '-'}
                                     </td>
                                     <td>
-                                        ${video.videoName ? `
-                                            <div style="display: flex; flex-direction: column; gap: 4px;">
-                                                <span class="status-badge ${video.videoApproved ? 'status-approved' : 'status-pending'}">
-                                                    ${video.videoApproved ? '✓ Onaylandı' : '⏳ Onay Bekliyor'}
-                                                </span>
-                                                ${!video.videoApproved ? `<button class="btn btn-xs btn-success" onclick="approveVideo('${video.id}')">Onayla</button>` : ''}
-                                            </div>
-                                        ` : '-'}
+                                        ${!video.videoUrl ? `
+                                            <span class="status-badge status-no-video">Video Yok</span>
+                                            <button class="btn btn-xs btn-warning" onclick="openUploadModal('${video.id}')" style="margin-left: 8px;">Ekle</button>
+                                        ` : video.status === 'pending' ? `
+                                            <span class="status-badge status-pending">⏳ Onay Bekliyor</span>
+                                            <button class="btn btn-xs btn-success" onclick="openWatchModal('${video.id}')" style="margin-left: 8px;">İzle</button>
+                                        ` : `
+                                            <span class="status-badge status-approved">✓ Onaylandı</span>
+                                        `}
                                     </td>
                                     <td>
-                                        <div class="table-actions">
-                                            <button class="btn btn-xs btn-secondary" onclick="editVideo('${video.id}')">✏️</button>
-                                            <button class="btn btn-xs btn-danger" onclick="deleteVideo('${video.id}')">🗑</button>
-                                        </div>
+                                        <button class="btn btn-xs btn-secondary" onclick="editVideo('${video.id}')">✏️</button>
+                                        <button class="btn btn-xs btn-danger" onclick="deleteVideo('${video.id}')">🗑</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -1370,7 +1266,7 @@
                 <div class="empty-state">
                     <div class="empty-icon">📺</div>
                     <h3 class="empty-title">Hoş Geldiniz!</h3>
-                    <p class="empty-text">YouTube Shorts videolarınızı organize etmeye başlamak için ilk kanalınızı oluşturun</p>
+                    <p class="empty-text">İlk kanalınızı oluşturun</p>
                     <button class="btn btn-primary" onclick="openChannelModal()">+ Kanal Oluştur</button>
                 </div>
             `;
@@ -1382,20 +1278,19 @@
         }
 
         function toggleDefaults() {
-            const content = document.getElementById('defaultsContent');
-            content.classList.toggle('collapsed');
+            document.getElementById('defaultsContent').classList.toggle('collapsed');
         }
 
+        // Video Modal (Info only)
         function openVideoModal(videoId = null) {
-            const channel = getSelectedChannel();
             editingVideoId = videoId;
-            audioBase64 = null;
-            audioName = null;
-            videoBase64 = null;
-            videoName = null;
-
+            audioFile = null;
+            
+            const channel = getSelectedChannel();
+            const videos = channel.videos || [];
+            
             if (videoId) {
-                const video = channel.videos.find(v => v.id === videoId);
+                const video = videos.find(v => v.id === videoId);
                 document.getElementById('videoTitle').value = video.title;
                 document.getElementById('videoDescription').value = video.description || '';
                 document.getElementById('videoTags').value = video.tags || '';
@@ -1403,12 +1298,7 @@
                 document.getElementById('videoTime').value = video.scheduleTime || '';
                 document.getElementById('videoText').value = video.text || '';
                 document.getElementById('audioFileName').textContent = video.audioName || '';
-                document.getElementById('videoFileName').textContent = video.videoName || '';
                 document.getElementById('videoModalTitle').textContent = 'Videoyu Düzenle';
-                audioBase64 = video.audioBase64;
-                audioName = video.audioName;
-                videoBase64 = video.videoBase64;
-                videoName = video.videoName;
             } else {
                 document.getElementById('videoTitle').value = '';
                 document.getElementById('videoDescription').value = '';
@@ -1417,47 +1307,93 @@
                 document.getElementById('videoTime').value = '';
                 document.getElementById('videoText').value = '';
                 document.getElementById('audioFileName').textContent = '';
-                document.getElementById('videoFileName').textContent = '';
-                document.getElementById('videoModalTitle').textContent = 'Yeni Video';
+                document.getElementById('videoModalTitle').textContent = 'Yeni Video Bilgisi';
             }
-
+            
             document.getElementById('videoModal').classList.add('active');
         }
 
         function closeVideoModal() {
             document.getElementById('videoModal').classList.remove('active');
             editingVideoId = null;
-            audioBase64 = null;
-            audioName = null;
-            videoBase64 = null;
-            videoName = null;
+            audioFile = null;
         }
 
         function handleAudioUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                audioName = file.name;
+                audioFile = file;
                 document.getElementById('audioFileName').textContent = file.name;
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    audioBase64 = e.target.result;
-                };
-                reader.readAsDataURL(file);
             }
         }
 
-        function handleVideoUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                videoName = file.name;
-                document.getElementById('videoFileName').textContent = file.name;
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    videoBase64 = e.target.result;
-                };
-                reader.readAsDataURL(file);
+        async function saveVideo() {
+            const title = document.getElementById('videoTitle').value.trim();
+            if (!title) {
+                showToast('Başlık gerekli!', 'error');
+                return;
+            }
+
+            updateSyncStatus('syncing');
+            
+            const channel = getSelectedChannel();
+            let videos = channel.videos || [];
+            
+            let audioUrl = null;
+            let audioName = null;
+            
+            // Upload audio if selected
+            if (audioFile) {
+                try {
+                    const audioRef = storage.ref(`audio/${Date.now()}_${audioFile.name}`);
+                    await audioRef.put(audioFile);
+                    audioUrl = await audioRef.getDownloadURL();
+                    audioName = audioFile.name;
+                } catch (error) {
+                    console.error('Audio upload error:', error);
+                    showToast('Ses yüklenemedi!', 'error');
+                }
+            }
+
+            const videoData = {
+                title: title,
+                description: document.getElementById('videoDescription').value.trim(),
+                tags: document.getElementById('videoTags').value.trim(),
+                scheduleDate: document.getElementById('videoDate').value,
+                scheduleTime: document.getElementById('videoTime').value,
+                text: document.getElementById('videoText').value.trim(),
+                completed: false,
+                status: 'draft',
+                videoUrl: null,
+                videoName: null
+            };
+
+            if (editingVideoId) {
+                const index = videos.findIndex(v => v.id === editingVideoId);
+                if (index !== -1) {
+                    videos[index] = { ...videos[index], ...videoData };
+                    if (audioUrl) {
+                        videos[index].audioUrl = audioUrl;
+                        videos[index].audioName = audioName;
+                    }
+                }
+            } else {
+                videoData.id = generateId();
+                videoData.createdAt = new Date().toISOString();
+                if (audioUrl) {
+                    videoData.audioUrl = audioUrl;
+                    videoData.audioName = audioName;
+                }
+                videos.push(videoData);
+            }
+
+            try {
+                await db.collection('shorts_channels').doc(channel.id).update({ videos });
+                closeVideoModal();
+                showToast(editingVideoId ? 'Güncellendi!' : 'Video bilgisi eklendi!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Hata oluştu!', 'error');
             }
         }
 
@@ -1465,110 +1401,176 @@
             openVideoModal(id);
         }
 
-        function saveVideo() {
-            const channel = getSelectedChannel();
-            const title = document.getElementById('videoTitle').value.trim();
-            const description = document.getElementById('videoDescription').value.trim();
-            const tags = document.getElementById('videoTags').value.trim();
-            const scheduleDate = document.getElementById('videoDate').value;
-            const scheduleTime = document.getElementById('videoTime').value;
-            const text = document.getElementById('videoText').value.trim();
-
-            if (!title) {
-                showToast('Başlık gerekli!', 'error');
-                return;
-            }
-
-            if (editingVideoId) {
-                const video = channel.videos.find(v => v.id === editingVideoId);
-                const hadVideo = video.videoName;
-                video.title = title;
-                video.description = description;
-                video.tags = tags;
-                video.scheduleDate = scheduleDate;
-                video.scheduleTime = scheduleTime;
-                video.text = text;
-                if (audioBase64) {
-                    video.audioBase64 = audioBase64;
-                    video.audioName = audioName;
-                }
-                if (videoBase64) {
-                    video.videoBase64 = videoBase64;
-                    video.videoName = videoName;
-                    if (!hadVideo) {
-                        video.videoApproved = false;
-                    }
-                }
-            } else {
-                channel.videos.push({
-                    id: generateId(),
-                    title: title,
-                    description: description,
-                    tags: tags,
-                    scheduleDate: scheduleDate,
-                    scheduleTime: scheduleTime,
-                    text: text,
-                    audioBase64: audioBase64,
-                    audioName: audioName,
-                    videoBase64: videoBase64,
-                    videoName: videoName,
-                    videoApproved: false,
-                    completed: false,
-                    createdAt: new Date().toISOString()
-                });
-            }
-
-            saveData();
-            closeVideoModal();
-            renderContent();
-            renderChannels();
-            showToast(editingVideoId ? 'Video güncellendi!' : 'Video eklendi!', 'success');
-        }
-
-        function deleteVideo(id) {
+        async function deleteVideo(id) {
             if (!confirm('Bu videoyu silmek istediğinize emin misiniz?')) return;
             
+            updateSyncStatus('syncing');
+            
             const channel = getSelectedChannel();
-            channel.videos = channel.videos.filter(v => v.id !== id);
-            saveData();
-            renderContent();
-            renderChannels();
-            showToast('Video silindi!', 'success');
-        }
-
-        function toggleComplete(id) {
-            const channel = getSelectedChannel();
-            const video = channel.videos.find(v => v.id === id);
-            video.completed = !video.completed;
-            saveData();
-            renderContent();
-            showToast(video.completed ? 'Video tamamlandı!' : 'Video geri alındı!', 'success');
-        }
-
-        function approveVideo(id) {
-            const channel = getSelectedChannel();
-            const video = channel.videos.find(v => v.id === id);
-            video.videoApproved = true;
-            saveData();
-            renderContent();
-            showToast('Video onaylandı!', 'success');
-        }
-
-        function downloadAudio(id) {
-            const channel = getSelectedChannel();
-            const video = channel.videos.find(v => v.id === id);
-            if (video.audioBase64) {
-                const link = document.createElement('a');
-                link.href = video.audioBase64;
-                link.download = video.audioName || 'audio.mp3';
-                link.click();
-                showToast('Ses dosyası indiriliyor!', 'success');
+            const videos = (channel.videos || []).filter(v => v.id !== id);
+            
+            try {
+                await db.collection('shorts_channels').doc(channel.id).update({ videos });
+                showToast('Video silindi!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Hata oluştu!', 'error');
             }
         }
 
+        async function toggleComplete(id) {
+            const channel = getSelectedChannel();
+            const videos = channel.videos || [];
+            const index = videos.findIndex(v => v.id === id);
+            
+            if (index !== -1) {
+                videos[index].completed = !videos[index].completed;
+                
+                try {
+                    await db.collection('shorts_channels').doc(channel.id).update({ videos });
+                    showToast(videos[index].completed ? 'Tamamlandı!' : 'Geri alındı!', 'success');
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        }
+
+        // MP4 Upload Modal
+        function openUploadModal(videoId) {
+            uploadingVideoId = videoId;
+            mp4File = null;
+            
+            const channel = getSelectedChannel();
+            const video = (channel.videos || []).find(v => v.id === videoId);
+            
+            document.getElementById('uploadVideoTitle').textContent = video?.title || '';
+            document.getElementById('mp4FileName').textContent = '';
+            document.getElementById('videoPreviewContainer').style.display = 'none';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('mp4File').value = '';
+            
+            document.getElementById('uploadModal').classList.add('active');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.remove('active');
+            uploadingVideoId = null;
+            mp4File = null;
+        }
+
+        function handleMp4Upload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                mp4File = file;
+                document.getElementById('mp4FileName').textContent = file.name;
+                document.getElementById('submitBtn').disabled = false;
+                
+                // Preview
+                const preview = document.getElementById('videoPreview');
+                preview.src = URL.createObjectURL(file);
+                document.getElementById('videoPreviewContainer').style.display = 'block';
+            }
+        }
+
+        async function submitForApproval() {
+            if (!mp4File || !uploadingVideoId) return;
+            
+            updateSyncStatus('syncing');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = '⏳ Yükleniyor...';
+            
+            try {
+                // Upload video
+                const videoRef = storage.ref(`videos/${Date.now()}_${mp4File.name}`);
+                await videoRef.put(mp4File);
+                const videoUrl = await videoRef.getDownloadURL();
+                
+                // Update video status
+                const channel = getSelectedChannel();
+                const videos = channel.videos || [];
+                const index = videos.findIndex(v => v.id === uploadingVideoId);
+                
+                if (index !== -1) {
+                    videos[index].videoUrl = videoUrl;
+                    videos[index].videoName = mp4File.name;
+                    videos[index].status = 'pending';
+                    
+                    await db.collection('shorts_channels').doc(channel.id).update({ videos });
+                    
+                    closeUploadModal();
+                    showToast('Onaya gönderildi!', 'success');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Yükleme hatası!', 'error');
+            }
+            
+            document.getElementById('submitBtn').textContent = '📤 Onaya Gönder';
+        }
+
+        // Watch & Approve Modal
+        function openWatchModal(videoId) {
+            watchingVideoId = videoId;
+            
+            const channel = getSelectedChannel();
+            const video = (channel.videos || []).find(v => v.id === videoId);
+            
+            if (video) {
+                document.getElementById('watchVideoTitle').textContent = video.title;
+                document.getElementById('watchVideoPlayer').src = video.videoUrl;
+                document.getElementById('watchModal').classList.add('active');
+            }
+        }
+
+        function closeWatchModal() {
+            document.getElementById('watchModal').classList.remove('active');
+            document.getElementById('watchVideoPlayer').pause();
+            document.getElementById('watchVideoPlayer').src = '';
+            watchingVideoId = null;
+        }
+
+        async function approveVideo() {
+            if (!watchingVideoId) return;
+            
+            updateSyncStatus('syncing');
+            
+            const channel = getSelectedChannel();
+            const videos = channel.videos || [];
+            const index = videos.findIndex(v => v.id === watchingVideoId);
+            
+            if (index !== -1) {
+                videos[index].status = 'approved';
+                
+                try {
+                    await db.collection('shorts_channels').doc(channel.id).update({ videos });
+                    closeWatchModal();
+                    showToast('Video onaylandı!', 'success');
+                } catch (error) {
+                    console.error('Error:', error);
+                    showToast('Hata oluştu!', 'error');
+                }
+            }
+        }
+
+        // Audio Download
+        function downloadAudio(videoId) {
+            const channel = getSelectedChannel();
+            const video = (channel.videos || []).find(v => v.id === videoId);
+            
+            if (video?.audioUrl) {
+                const a = document.createElement('a');
+                a.href = video.audioUrl;
+                a.target = '_blank';
+                a.download = video.audioName || 'audio.mp3';
+                a.click();
+                showToast('Ses indiriliyor!', 'success');
+            }
+        }
+
+        // Defaults
         function openDefaultsModal() {
             const channel = getSelectedChannel();
-            document.getElementById('defaultText').value = channel.defaults.text || '';
+            document.getElementById('defaultText').value = channel.defaults?.text || '';
             document.getElementById('defaultsModal').classList.add('active');
         }
 
@@ -1576,79 +1578,25 @@
             document.getElementById('defaultsModal').classList.remove('active');
         }
 
-        function saveDefaults() {
+        async function saveDefaults() {
             const channel = getSelectedChannel();
-            channel.defaults = {
-                text: document.getElementById('defaultText').value.trim()
-            };
-            saveData();
-            closeDefaultsModal();
-            renderContent();
-            showToast('Sabitler kaydedildi!', 'success');
-        }
-
-        function exportData() {
-            const exportObj = JSON.parse(JSON.stringify(data));
-            // Remove large base64 data for smaller export
-            exportObj.channels.forEach(channel => {
-                channel.videos.forEach(video => {
-                    if (video.audioBase64) {
-                        video.hasAudio = true;
-                        delete video.audioBase64;
-                    }
-                    if (video.videoBase64) {
-                        video.hasVideo = true;
-                        delete video.videoBase64;
-                    }
-                });
-            });
+            const text = document.getElementById('defaultText').value.trim();
             
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'youtube-shorts-data.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Veriler dışa aktarıldı!', 'success');
-        }
-
-        function importDataClick() {
-            document.getElementById('importFile').click();
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const imported = JSON.parse(e.target.result);
-                        if (imported.channels) {
-                            data = imported;
-                            saveData();
-                            renderChannels();
-                            if (data.selectedChannel) {
-                                renderContent();
-                            } else if (data.channels.length > 0) {
-                                selectChannel(data.channels[0].id);
-                            } else {
-                                renderEmptyState();
-                            }
-                            showToast('Veriler içe aktarıldı!', 'success');
-                        } else {
-                            showToast('Geçersiz dosya formatı!', 'error');
-                        }
-                    } catch (err) {
-                        showToast('Dosya okunamadı!', 'error');
-                    }
-                };
-                reader.readAsText(file);
+            try {
+                await db.collection('shorts_channels').doc(channel.id).update({
+                    'defaults.text': text
+                });
+                closeDefaultsModal();
+                showToast('Sabitler kaydedildi!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showToast('Hata oluştu!', 'error');
             }
         }
 
+        // Utilities
         function generateId() {
-            return Math.random().toString(36).substr(2, 9);
+            return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
         }
 
         function escapeHtml(text) {
@@ -1660,7 +1608,7 @@
         function formatDate(dateStr) {
             if (!dateStr) return '';
             const date = new Date(dateStr);
-            return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            return date.toLocaleDateString('tr-TR');
         }
 
         function showToast(message, type = 'success') {
@@ -1668,13 +1616,14 @@
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             toast.innerHTML = `
-                <span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span>
+                <span>${type === 'success' ? '✓' : '⚠'}</span>
                 <span>${escapeHtml(message)}</span>
             `;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
 
+        // Start
         init();
     </script>
 </body>
